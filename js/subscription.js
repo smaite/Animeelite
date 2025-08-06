@@ -253,7 +253,7 @@ function validateCoupon(couponCode) {
         });
     }
     
-    return fetch('https://cdn.glorioustradehub.com/server/validate_coupon.php', {
+    return fetch('https://cdn.glorioustradehub.com/validate_coupon.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
