@@ -107,7 +107,7 @@ function checkPremiumStatus(userId) {
     }
     
     // Fetch from server
-    fetch('https://cdn.glorioustradehub.com/server/subscription_status.php', {
+    fetch('https://cdn.glorioustradehub.com/subscription_status.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -177,7 +177,7 @@ function loadFeaturedAnime() {
     `;
     
     // Fetch featured anime from server
-    fetch('https://cdn.glorioustradehub.com/server/get_featured_anime.php')
+    fetch('https://cdn.glorioustradehub.com/get_featured_anime.php')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.anime.length > 0) {
@@ -222,7 +222,7 @@ function loadLatestEpisodes() {
     `;
     
     // Fetch latest episodes from server
-    fetch('https://cdn.glorioustradehub.com/server/get_latest_episodes.php')
+    fetch('https://cdn.glorioustradehub.com/get_latest_episodes.php')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.episodes.length > 0) {

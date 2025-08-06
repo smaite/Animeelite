@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function fetchAnimeDetails(animeId, seasonId, episodeId) {
     // Build URL with parameters
-    let url = `https://cdn.glorioustradehub.com/server/get_anime_details.php?anime_id=${animeId}`;
+    let url = `https://cdn.glorioustradehub.com/get_anime_details.php?anime_id=${animeId}`;
     if (seasonId) url += `&season_id=${seasonId}`;
     if (episodeId) url += `&episode_id=${episodeId}`;
     
@@ -311,7 +311,7 @@ function checkPremiumStatus(userId, callback) {
     }
     
     // Fetch from server
-    fetch('https://cdn.glorioustradehub.com/server/subscription_status.php', {
+    fetch('https://cdn.glorioustradehub.com/subscription_status.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
