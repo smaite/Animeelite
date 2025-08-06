@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Subscriptions - AnimeElite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                        },
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="../js/firebase-config.js"></script>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="navbar py-4 sticky top-0 z-50">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="../index.html" class="text-2xl font-bold logo-text">AnimeElite</a>
+            <div class="flex items-center">
+                <div class="hidden md:block mr-6">
+                    <a href="../index.html" class="text-white hover:text-primary-400 px-3 transition-colors duration-200">Home</a>
+                    <a href="browse.html" class="text-white hover:text-primary-400 px-3 transition-colors duration-200">Browse</a>
+                    <a href="trending.html" class="text-white hover:text-primary-400 px-3 transition-colors duration-200">Trending</a>
+                    <a href="favorites.html" class="text-white hover:text-primary-400 px-3 transition-colors duration-200">Favorites</a>
+                    <a href="subscription.html" class="text-primary-400 px-3 transition-colors duration-200">Premium</a>
+                </div>
+                
+                <!-- User dropdown - This will be shown when logged in -->
+                <div class="user-dropdown hidden" id="user-dropdown">
+                    <button class="flex items-center space-x-2 bg-gray-800 bg-opacity-50 p-2 rounded-lg" id="user-menu-button">
+                        <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
+                            <span class="font-bold text-sm" id="user-initials">JD</span>
+                        </div>
+                        <span class="hidden md:inline" id="user-display-name">John</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div class="user-menu hidden animate-fade-in" id="user-menu">
+                        <div class="p-3 border-b border-gray-700">
+                            <p class="font-bold" id="dropdown-user-name">John Doe</p>
+                            <p class="text-sm text-gray-400" id="dropdown-user-email">john@example.com</p>
+                        </div>
+                        <a href="profile.html" class="user-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            My Profile
+                        </a>
+                        <a href="subscription.html" class="user-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Subscription
+                        </a>
+                        <a href="watchlist.html" class="user-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                            My Watchlist
+                        </a>
+                        <a href="history.html" class="user-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Watch History
+                        </a>
+                        <div class="user-menu-divider"></div>
+                        <a href="#" class="user-menu-item" id="logout-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Login/Signup buttons - These will be hidden when logged in -->
+                <div class="flex items-center" id="auth-buttons">
+                    <input type="text" placeholder="Search anime..." class="bg-gray-800 px-3 py-1 rounded-lg mr-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <a href="login.html" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-1 rounded-lg mr-2 transition-colors duration-200">Login</a>
+                    <a href="signup.html" class="bg-transparent border border-primary-600 hover:bg-primary-600 text-white px-4 py-1 rounded-lg transition-all duration-200">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative py-16 md:py-24 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-95"></div>
+            <div class="w-full h-full bg-[url('https://i.imgur.com/Wlx2Sju.jpg')] bg-cover bg-center opacity-40"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-3xl mx-auto text-center animate-fade-in">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                    Upgrade Your Anime Experience
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 animate-slide-up delay-200">
+                    Get exclusive access to premium features, early releases, and an ad-free experience.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 animate-slide-up delay-300">
+                    <a href="#subscription-plans" class="btn btn-gradient px-8 py-3 text-lg">
+                        View Plans
+                    </a>
+                    <a href="#features" class="btn bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 text-lg">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Plans -->
+    <section id="subscription-plans" class="py-16 bg-gradient-to-b from-black to-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Select the perfect subscription that suits your anime watching needs.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Free Plan -->
+                <div class="subscription-card p-8 flex flex-col animate-fade-in animate-slide-up delay-100">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Free</h3>
+                        <div class="flex items-end">
+                            <span class="text-4xl font-bold">$0</span>
+                            <span class="text-gray-400 ml-1">/month</span>
+                        </div>
+                        <p class="text-gray-400 mt-3">Basic access to our library</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Access to standard library</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>720p video quality</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Basic watchlist features</span>
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <svg class="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span>Ad-supported</span>
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <svg class="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span>No offline viewing</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn btn-primary w-full py-3 text-center">Current Plan</a>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="subscription-card premium p-8 flex flex-col animate-fade-in animate-slide-up delay-200 transform scale-105 z-10">
+                    <div class="absolute top-0 right-0 mt-4 mr-4">
+                        <span class="premium-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                            BEST VALUE
+                        </span>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Premium</h3>
+                        <div class="flex items-end">
+                            <span class="text-4xl font-bold">$9.99</span>
+                            <span class="text-gray-400 ml-1">/month</span>
+                        </div>
+                        <p class="text-gray-400 mt-3">Enhanced streaming experience</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Full library access</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>1080p Full HD streaming</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span><strong>Ad-free</strong> experience</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Download for offline viewing</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Early access to new episodes</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn btn-gradient w-full py-3 text-center animate-pulse-slow">Subscribe Now</a>
+                </div>
+                
+                <!-- Ultimate Plan -->
+                <div class="subscription-card p-8 flex flex-col animate-fade-in animate-slide-up delay-300">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Ultimate</h3>
+                        <div class="flex items-end">
+                            <span class="text-4xl font-bold">$14.99</span>
+                            <span class="text-gray-400 ml-1">/month</span>
+                        </div>
+                        <p class="text-gray-400 mt-3">The complete package</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Everything in Premium</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>4K Ultra HD streaming</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Simultaneous streaming (4 devices)</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Exclusive behind-the-scenes content</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Priority customer support</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="#" class="btn bg-gray-800 hover:bg-gray-700 text-white w-full py-3 text-center">Subscribe</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coupon Section -->
+    <section class="py-12 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto bg-gray-800 rounded-xl p-8 shadow-lg animate-fade-in">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Have a Discount Coupon?
+                </h3>
+                <p class="text-gray-400 mb-6">Enter your coupon code to get special discounts on your subscription.</p>
+                
+                <form id="coupon-form" class="mb-4">
+                    <div class="coupon-input">
+                        <input type="text" id="coupon-code" placeholder="Enter coupon code" class="w-full">
+                        <button type="submit" class="whitespace-nowrap">Apply Coupon</button>
+                    </div>
+                </form>
+                
+                <!-- Success message (initially hidden) -->
+                <div id="coupon-success" class="coupon-success hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Coupon applied successfully! You saved 20% on your subscription.</span>
+                </div>
+                
+                <!-- Error message (initially hidden) -->
+                <div id="coupon-error" class="coupon-error hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>Invalid coupon code. Please try again.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-8 mt-12 shadow-inner">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-6 md:mb-0">
+                    <h2 class="text-2xl font-bold logo-text mb-4">AnimeElite</h2>
+                    <p class="text-gray-400">The best place to watch anime online.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold mb-2 text-primary-400">Navigation</h3>
+                        <ul class="text-gray-400">
+                            <li class="mb-1"><a href="../index.html" class="hover:text-white transition-colors duration-200">Home</a></li>
+                            <li class="mb-1"><a href="browse.html" class="hover:text-white transition-colors duration-200">Browse</a></li>
+                            <li class="mb-1"><a href="trending.html" class="hover:text-white transition-colors duration-200">Trending</a></li>
+                            <li class="mb-1"><a href="favorites.html" class="hover:text-white transition-colors duration-200">Favorites</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold mb-2 text-primary-400">Account</h3>
+                        <ul class="text-gray-400">
+                            <li class="mb-1"><a href="login.html" class="hover:text-white transition-colors duration-200">Login</a></li>
+                            <li class="mb-1"><a href="signup.html" class="hover:text-white transition-colors duration-200">Sign Up</a></li>
+                            <li class="mb-1"><a href="profile.html" class="hover:text-white transition-colors duration-200">Profile</a></li>
+                            <li class="mb-1"><a href="subscription.html" class="hover:text-white transition-colors duration-200">Subscription</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold mb-2 text-primary-400">Legal</h3>
+                        <ul class="text-gray-400">
+                            <li class="mb-1"><a href="terms.html" class="hover:text-white transition-colors duration-200">Terms of Service</a></li>
+                            <li class="mb-1"><a href="privacy.html" class="hover:text-white transition-colors duration-200">Privacy Policy</a></li>
+                            <li class="mb-1"><a href="dmca.html" class="hover:text-white transition-colors duration-200">DMCA</a></li>
+                            <li class="mb-1"><a href="contact.html" class="hover:text-white transition-colors duration-200">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400">
+                <p>© 2023 AnimeElite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/subscription.js"></script>
+</body>
+</html> 
