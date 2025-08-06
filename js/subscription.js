@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {string} userId - Firebase user ID
  */
 function fetchSubscriptionStatus(userId) {
-    fetch('https://cdn.glorioustradehub.com/server/subscription_status.php', {
+    fetch('https://cdn.glorioustradehub.com/subscription_status.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
