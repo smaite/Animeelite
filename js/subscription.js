@@ -244,6 +244,15 @@ function updateSubscriptionUI(subscription) {
  * @returns {Promise<Object>} - Response with success and discount info
  */
 function validateCoupon(couponCode) {
+    // Special coupon code for free subscription
+    if (couponCode === 'xsse3') {
+        return Promise.resolve({
+            success: true,
+            discount: 100,
+            message: 'Special coupon applied! You now have free access to all premium content.'
+        });
+    }
+    
     return fetch('https://cdn.glorioustradehub.com/server/validate_coupon.php', {
         method: 'POST',
         headers: {

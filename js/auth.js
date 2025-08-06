@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 // Redirect to home page on success
-                window.location.href = '../index.html';
+                window.location.href = '../subscription.html';
                 
             } catch (error) {
                 // Display error message
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Redirect to home page on success
-                window.location.href = '../index.html';
+                window.location.href = '../subscription.html';
                 
             } catch (error) {
                 console.error("Google Sign In Error", error);
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Redirect to home page on success
-                window.location.href = '../index.html';
+                window.location.href = '../subscription.html';
                 
             } catch (error) {
                 console.error("Facebook Sign In Error", error);
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Redirect to home page on success
-                window.location.href = '../index.html';
+                window.location.href = '../subscription.html';
                 
             } catch (error) {
                 console.error("Twitter Sign In Error", error);
