@@ -72,10 +72,16 @@ function fetchAnimeDetails(animeId, seasonId, episodeId) {
     if (seasonId) url += `&season_id=${seasonId}`;
     if (episodeId) url += `&episode_id=${episodeId}`;
     
+    console.log('Fetching anime details from:', url);
+    
     // Fetch data from server
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Received data:', data);
             if (data.success) {
                 // Update UI with anime data
                 updateAnimeUI(data);
