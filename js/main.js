@@ -1,5 +1,13 @@
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Add error handling for images
+    document.querySelectorAll('img').forEach(img => {
+        img.onerror = function() {
+            // Replace with placeholder image if loading fails
+            this.src = 'https://via.placeholder.com/300x450?text=Image+Not+Available';
+            this.onerror = null; // Prevent infinite loop
+        };
+    });
     // Initialize Firebase authentication
     if (typeof firebase !== 'undefined') {
         const auth = firebase.auth();

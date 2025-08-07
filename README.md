@@ -1,104 +1,72 @@
-# AnimeElite Streaming Website
+# AnimeElite
 
-An anime streaming website built with HTML, Tailwind CSS, and JavaScript. Features a modern UI, video player, user authentication, and subscription system.
+A modern anime streaming platform with Firebase authentication and premium subscription features.
+
+## Local Development
+
+### Setup
+
+1. Clone the repository
+2. Set up a local server (using XAMPP, WAMP, or VS Code Live Server)
+3. Open the project in your browser
+
+### API Endpoints
+
+When developing locally, you'll encounter CORS issues when trying to access the production API endpoints. To work around this, you can:
+
+1. Use the mock API endpoint for local testing:
+   - For PHP server: `http://localhost/path-to-project/mock_api.php?endpoint=get_anime_details`
+   - For VS Code Live Server: You'll need to set up a PHP server separately
+
+### Mock API Usage
+
+The `mock_api.php` file provides mock responses for testing:
+
+- **Anime Details**: `mock_api.php?endpoint=get_anime_details`
+- **Subscription Status**: `mock_api.php?endpoint=subscription_status`
+- **Coupon Validation**: `mock_api.php?endpoint=validate_coupon` (POST request with `couponCode` parameter)
+
+### Local API Testing
+
+For local development, you can modify the API URLs in the JavaScript files:
+
+```javascript
+// Example for player.js
+function fetchAnimeDetails(animeId, seasonId, episodeId) {
+    // For local testing
+    let url = `mock_api.php?endpoint=get_anime_details&anime_id=${animeId}`;
+    
+    // For production
+    // let url = `https://cdn.glorioustradehub.com/get_anime_details.php?anime_id=${animeId}`;
+    
+    // Rest of the function...
+}
+```
 
 ## Features
 
-- **User Authentication**: Sign up, login, and persistent user sessions using Firebase Authentication.
-- **Video Player**: Stream anime episodes with season and episode navigation.
-- **Subscription System**: Free, Premium, and Ultimate subscription tiers with various features.
-- **Coupon System**: Apply discount coupons to subscriptions.
-- **AMOLED UI**: Dark, sleek interface designed for OLED displays.
-- **Responsive Design**: Works on desktop, tablet, and mobile devices.
-- **Favorites**: Save anime to your favorites list.
-- **Watch History**: Track your watched episodes.
-- **Search Functionality**: Find your favorite anime.
+- **Authentication**: Email/password and social login via Firebase
+- **Video Streaming**: Embedded video player with season and episode selection
+- **Premium Content**: Subscription-based access to premium content
+- **Coupon System**: Apply discount codes to subscriptions
+- **Responsive Design**: Modern UI with Tailwind CSS
+- **Dark Mode**: AMOLED-friendly dark theme
 
-## Pages
+## Special Features
 
-- **Home**: Featured anime and latest episodes.
-- **Player**: Video player with episode navigation and comments.
-- **Login/Signup**: User authentication pages.
-- **Subscription**: Premium subscription plans.
-- **Profile**: User profile management.
-- **Favorites**: User's favorite anime.
-- **History**: User's watch history.
+- **Special Coupon**: Use code `xsse3` for 100% discount (free premium access)
+- **Offline Mode**: For development, the site will work without API access
 
-## Project Structure
+## Troubleshooting
 
-```
-AnimeElite/
-│
-├── index.html               # Main landing page
-├── css/
-│   └── styles.css           # Custom CSS styles
-│
-├── js/
-│   ├── main.js              # Main JavaScript functions
-│   ├── firebase-config.js   # Firebase configuration
-│   ├── auth.js              # Authentication logic
-│   ├── player.js            # Video player functionality
-│   └── subscription.js      # Subscription handling
-│
-├── pages/
-│   ├── login.html           # Login page
-│   ├── signup.html          # Sign-up page
-│   ├── player.html          # Video player page
-│   └── subscription.html    # Premium subscriptions page
-│
-└── server/                  # Backend PHP files (to be deployed separately)
-    ├── subscription_status.php   # Check subscription status API
-    ├── validate_coupon.php       # Coupon validation API
-    ├── db_setup.sql              # Database setup script
-    │
-    └── admin/                    # Admin panel
-        ├── subscription_management.php   # Manage subscriptions
-        │
-        └── ajax/                        # Admin AJAX endpoints
-            ├── subscription_history.php # Get user subscription history
-            └── deactivate_coupon.php    # Deactivate a coupon
-```
+### CORS Errors
 
-## Technology Stack
+If you see CORS errors in the console:
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **CSS Framework**: Tailwind CSS
-- **Authentication**: Firebase Authentication
-- **Database**: Firebase Firestore, MySQL (for subscription system)
-- **Video Playback**: HTML5 iframe embedding
+1. The app will fall back to mock data for development
+2. For production, ensure the server has proper CORS headers
+3. Use the mock API for local testing
 
-## Getting Started
+### Missing Images
 
-1. Clone the repository
-2. Configure your Firebase project and update `firebase-config.js` with your credentials
-3. Host the frontend files on a static web server
-4. Set up MySQL database using `server/db_setup.sql`
-5. Deploy PHP backend files to a PHP-capable server
-
-## Note
-
-This is a frontend prototype. In a production environment, you should:
-
-1. Implement proper backend services and APIs
-2. Set up secure authentication flows
-3. Add proper error handling and validation
-4. Optimize assets for production
-5. Implement proper video streaming security
-
-## Database Setup
-
-To set up the MySQL database for the subscription system:
-
-1. Create a MySQL database
-2. Run the `server/db_setup.sql` script to create the necessary tables
-3. Update database credentials in the PHP files in the `server` directory
-
-## Backend Deployment
-
-The `server` directory contains PHP files that should be deployed on a PHP-capable server with MySQL access. These files handle:
-
-- Subscription status checking
-- Coupon validation
-- Admin functionality for managing subscriptions
-
-Make sure to update the database connection settings in each PHP file to match your MySQL setup. 
+If images fail to load, the app will automatically use placeholder images. 
