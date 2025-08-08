@@ -32,7 +32,8 @@
         }
     </script>
     <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -57,9 +58,9 @@
                 <div class="user-dropdown hidden" id="user-dropdown">
                     <button class="flex items-center space-x-2 bg-gray-800 bg-opacity-50 p-2 rounded-lg" id="user-menu-button">
                         <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
-                            <span class="font-bold text-sm" id="user-initials">JD</span>
+                            <span class="font-bold text-sm" id="user-initials"></span>
                         </div>
-                        <span class="hidden md:inline" id="user-display-name">John</span>
+                        <span class="hidden md:inline" id="user-display-name"></span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
@@ -68,8 +69,8 @@
                     <!-- Dropdown menu -->
                     <div class="user-menu hidden animate-fade-in" id="user-menu">
                         <div class="p-3 border-b border-gray-700">
-                            <p class="font-bold" id="dropdown-user-name">John Doe</p>
-                            <p class="text-sm text-gray-400" id="dropdown-user-email">john@example.com</p>
+                            <p class="font-bold" id="dropdown-user-name"></p>
+                            <p class="text-sm text-gray-400" id="dropdown-user-email"></p>
                         </div>
                         <a href="profile.html" class="user-menu-item">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,8 +147,9 @@
     <section id="subscription-plans" class="py-16 bg-gradient-to-b from-black to-gray-900">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16 animate-fade-in">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
-                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Select the perfect subscription that suits your anime watching needs.</p>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Premium Subscription Plans</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Use the special coupon codes below to activate your premium membership.</p>
+                <div class="mt-4 text-primary-400 inline-block border-b-2 border-primary-500 pb-1">All subscriptions require a coupon code to activate</div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -195,7 +197,7 @@
                         </li>
                     </ul>
                     
-                    <a href="#" class="btn btn-primary w-full py-3 text-center">Current Plan</a>
+                    <a href="#" class="btn btn-primary w-full py-3 text-center">Default Plan</a>
                 </div>
                 
                 <!-- Premium Plan -->
@@ -205,7 +207,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                             </svg>
-                            BEST VALUE
+                            RECOMMENDED
                         </span>
                     </div>
                     
@@ -251,7 +253,11 @@
                         </li>
                     </ul>
                     
-                    <a href="#" class="btn btn-gradient w-full py-3 text-center animate-pulse-slow">Subscribe Now</a>
+                    <div class="text-center">
+                        <div class="bg-primary-700 bg-opacity-40 p-2 rounded-md mb-4">
+                            <p class="text-sm">Use coupon code <span class="text-yellow-400 font-mono font-bold">xsse3</span> below to activate</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Ultimate Plan -->
@@ -298,7 +304,11 @@
                         </li>
                     </ul>
                     
-                    <a href="#" class="btn bg-gray-800 hover:bg-gray-700 text-white w-full py-3 text-center">Subscribe</a>
+                    <div class="text-center">
+                        <div class="bg-gray-700 bg-opacity-40 p-2 rounded-md mb-4">
+                            <p class="text-sm">Coming soon! Use premium coupons for now.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -312,23 +322,43 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
-                    Have a Discount Coupon?
+                    Activate Premium Membership
                 </h3>
-                <p class="text-gray-400 mb-6">Enter your coupon code to get special discounts on your subscription.</p>
+                <p class="text-gray-400 mb-6">Enter one of the premium coupon codes below to instantly activate your premium membership for 1 year!</p>
                 
                 <form id="coupon-form" class="mb-4">
                     <div class="coupon-input">
                         <input type="text" id="coupon-code" placeholder="Enter coupon code" class="w-full">
-                        <button type="submit" class="whitespace-nowrap">Apply Coupon</button>
+                        <button type="submit" class="whitespace-nowrap">Activate Premium</button>
                     </div>
                 </form>
+                
+                <!-- Available Coupons -->
+                <div class="mb-6 p-4 bg-gray-700 bg-opacity-50 rounded-lg">
+                    <h4 class="text-lg font-semibold mb-2 text-primary-300">Available Premium Coupons:</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div class="bg-gray-800 p-2 rounded border border-primary-600 text-center">
+                            <span class="font-mono text-yellow-400 font-bold">xsse3</span>
+                        </div>
+                        <div class="bg-gray-800 p-2 rounded border border-primary-600 text-center">
+                            <span class="font-mono text-yellow-400 font-bold">ELITE100</span>
+                        </div>
+                        <div class="bg-gray-800 p-2 rounded border border-primary-600 text-center">
+                            <span class="font-mono text-yellow-400 font-bold">ANIMEPRO</span>
+                        </div>
+                        <div class="bg-gray-800 p-2 rounded border border-primary-600 text-center">
+                            <span class="font-mono text-yellow-400 font-bold">PREMIUM24</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">These coupons give you free access to all premium content for 1 year!</p>
+                </div>
                 
                 <!-- Success message (initially hidden) -->
                 <div id="coupon-success" class="coupon-success hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Coupon applied successfully! You saved 20% on your subscription.</span>
+                    <span>Premium subscription activated! You now have access to all premium content.</span>
                 </div>
                 
                 <!-- Error message (initially hidden) -->

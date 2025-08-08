@@ -32,7 +32,8 @@
         }
     </script>
     <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -61,9 +62,9 @@
                 <div class="user-dropdown hidden" id="user-dropdown">
                     <button class="flex items-center space-x-2 bg-gray-800 bg-opacity-50 p-2 rounded-lg" id="user-menu-button">
                         <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
-                            <span class="font-bold text-sm" id="user-initials">JD</span>
+                            <span class="font-bold text-sm" id="user-initials"></span>
                         </div>
-                        <span class="hidden md:inline" id="user-display-name">John</span>
+                        <span class="hidden md:inline" id="user-display-name"></span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
@@ -72,8 +73,8 @@
                     <!-- Dropdown menu -->
                     <div class="user-menu hidden animate-fade-in" id="user-menu">
                         <div class="p-3 border-b border-gray-700">
-                            <p class="font-bold" id="dropdown-user-name">John Doe</p>
-                            <p class="text-sm text-gray-400" id="dropdown-user-email">john@example.com</p>
+                            <p class="font-bold" id="dropdown-user-name"></p>
+                            <p class="text-sm text-gray-400" id="dropdown-user-email"></p>
                         </div>
                         <a href="profile.html" class="user-menu-item">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,7 +147,7 @@
                 <div>
                     <h1 class="text-3xl font-bold" id="anime-title">Loading...</h1>
                     <div class="flex flex-wrap items-center text-gray-400 mt-2 gap-2">
-                        <span id="season-title" class="px-2 py-1 bg-primary-900 text-primary-300 rounded text-sm font-medium">Season 1</span>
+                        <span id="season-title" class="px-3 py-1 bg-primary-900 text-primary-300 rounded text-sm font-medium">Season 1</span>
                         <span id="episode-number" class="mr-2">Episode: Loading...</span>
                         <span class="hidden md:inline mr-2">•</span>
                         <span id="release-date">Air Date: Loading...</span>
@@ -212,31 +213,36 @@
                     </svg>
                     Episodes
                 </h2>
-                <div class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2" id="episode-list">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="episode-list">
                     <!-- Episodes will be populated by JavaScript -->
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                    <div class="animate-pulse bg-gray-700 h-10 rounded"></div>
-                </div>
-            </div>
-            
-            <!-- Seasons List -->
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold mb-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    Seasons & Episodes
-                </h2>
-                <div id="seasons-list" class="space-y-2">
-                    <!-- Seasons will be populated by JavaScript -->
-                    <div class="animate-pulse bg-gray-700 h-12 rounded mb-2"></div>
-                    <div class="animate-pulse bg-gray-700 h-36 rounded"></div>
+                    <div class="animate-pulse bg-gray-700 h-16 rounded flex">
+                        <div class="w-16 h-16 bg-gray-600"></div>
+                        <div class="flex-1 p-3">
+                            <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+                            <div class="h-3 bg-gray-600 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="animate-pulse bg-gray-700 h-16 rounded flex">
+                        <div class="w-16 h-16 bg-gray-600"></div>
+                        <div class="flex-1 p-3">
+                            <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+                            <div class="h-3 bg-gray-600 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="animate-pulse bg-gray-700 h-16 rounded flex">
+                        <div class="w-16 h-16 bg-gray-600"></div>
+                        <div class="flex-1 p-3">
+                            <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+                            <div class="h-3 bg-gray-600 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="animate-pulse bg-gray-700 h-16 rounded flex">
+                        <div class="w-16 h-16 bg-gray-600"></div>
+                        <div class="flex-1 p-3">
+                            <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+                            <div class="h-3 bg-gray-600 rounded w-1/2"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -341,12 +347,12 @@
                         <div class="flex items-start">
                             <div class="mr-3">
                                 <div class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center">
-                                    <span class="font-bold">JD</span>
+                                    <span class="font-bold">AE</span>
                                 </div>
                             </div>
                             <div class="flex-1">
                                 <div class="flex justify-between">
-                                    <h3 class="font-bold">JohnDoe</h3>
+                                    <h3 class="font-bold">AnimeUser</h3>
                                     <span class="text-gray-400 text-sm">2 days ago</span>
                                 </div>
                                 <p class="text-gray-300 mt-2 leading-relaxed">This episode was amazing! The animation and fight scenes were top-notch. Can't wait for the next one.</p>

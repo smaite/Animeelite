@@ -67,20 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {string|number} episodeId - Episode ID (optional)
  */
 function fetchAnimeDetails(animeId, seasonId, episodeId) {
-    // Determine if we should use local mock API or production API
-    const useMockApi = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    // Build URL with parameters
-    let url;
-    if (useMockApi) {
-        // Local development - use mock API
-        url = `mock_api.php?endpoint=get_anime_details&anime_id=${animeId}`;
-        console.log('Using mock API for local development');
-    } else {
-        // Production - use real API
-        url = `https://cdn.glorioustradehub.com/get_anime_details.php?anime_id=${animeId}`;
-    }
-    
+    // Always use the production API for episodes
+    let url = `https://cdn.glorioustradehub.com/get_anime_details.php?anime_id=${animeId}`;
     if (seasonId) url += `&season_id=${seasonId}`;
     if (episodeId) url += `&episode_id=${episodeId}`;
     
@@ -103,95 +91,7 @@ function fetchAnimeDetails(animeId, seasonId, episodeId) {
         })
         .catch(error => {
             console.error('Error fetching anime details:', error);
-            
-            // For local development, use hardcoded data if API fails
-            if (useMockApi || true) { // Always use fallback for now
-                console.log('Using fallback data for development');
-                
-                // Create mock data
-                const mockData = {
-                    success: true,
-                    anime: {
-                        id: 1,
-                        title: 'Demon Slayer',
-                        description: 'A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko, who is turning into a demon slowly. Tanjiro sets out to become a demon slayer to avenge his family and cure his sister.',
-                        cover_image: 'https://m.media-amazon.com/images/M/MV5BNmQ5Zjg2ZTYtMGZmNC00M2Y3LTgwZGQtYmQ3NWI5MDdhZWNjXkEyXkFqcGc@._V1_.jpg',
-                        release_year: '2019',
-                        genres: 'Action, Fantasy',
-                        status: 'ongoing'
-                    },
-                    seasons: [
-                        {
-                            id: 1,
-                            season_number: 1,
-                            title: 'Demon Slayer: Kimetsu no Yaiba',
-                            description: 'First season of Demon Slayer',
-                            cover_image: '',
-                            release_year: '2019',
-                            episodes: [
-                                {
-                                    id: 1,
-                                    episode_number: 1,
-                                    title: 'Cruelty',
-                                    description: 'Tanjiro Kamado is a kind-hearted and intelligent boy who lives with his family in the mountains. He became his family\'s breadwinner after his father\'s death.',
-                                    thumbnail: '',
-                                    video_url: 'https://www.youtube.com/embed/VQGCKyvzIM4',
-                                    duration: '24',
-                                    is_premium: 0
-                                },
-                                {
-                                    id: 2,
-                                    episode_number: 2,
-                                    title: 'Trainer Sakonji Urokodaki',
-                                    description: 'Tanjiro encounters a demon slayer named Giyu Tomioka, who is impressed by Tanjiro\'s resolve and tells him to find a man named Sakonji Urokodaki.',
-                                    thumbnail: '',
-                                    video_url: 'https://www.youtube.com/embed/VQGCKyvzIM4',
-                                    duration: '24',
-                                    is_premium: 0
-                                }
-                            ]
-                        },
-                        {
-                            id: 2,
-                            season_number: 2,
-                            title: 'Demon Slayer: Entertainment District Arc',
-                            description: 'Second season of Demon Slayer',
-                            cover_image: '',
-                            release_year: '2021',
-                            episodes: [
-                                {
-                                    id: 3,
-                                    episode_number: 1,
-                                    title: 'Sound Hashira Tengen Uzui',
-                                    description: 'Tanjiro and his friends accompany the Sound Hashira Tengen Uzui to investigate disappearances in the Entertainment District.',
-                                    thumbnail: '',
-                                    video_url: 'https://www.youtube.com/embed/VQGCKyvzIM4',
-                                    duration: '24',
-                                    is_premium: 1
-                                }
-                            ]
-                        }
-                    ],
-                    current_episode: {
-                        id: 1,
-                        episode_number: 1,
-                        title: 'Cruelty',
-                        description: 'Tanjiro Kamado is a kind-hearted and intelligent boy who lives with his family in the mountains. He became his family\'s breadwinner after his father\'s death.',
-                        thumbnail: '',
-                        video_url: 'https://www.youtube.com/embed/VQGCKyvzIM4',
-                        duration: '24',
-                        is_premium: 0,
-                        season_id: 1,
-                        season_number: 1,
-                        anime_id: 1,
-                        anime_title: 'Demon Slayer'
-                    }
-                };
-                
-                updateAnimeUI(mockData);
-            } else {
-                showError('Failed to load anime data. Please try again later.');
-            }
+            showError('Failed to load anime data. Please try again later.');
         })
         .finally(() => {
             hideLoading();
@@ -221,11 +121,46 @@ function updateAnimeUI(data) {
     // Update episode info
     updateEpisodeInfo(currentEpisode, anime);
     
-    // Update seasons and episodes list
-    updateSeasonsList(seasons, currentEpisode);
+    // Update episodes list
+    updateEpisodesList(seasons, currentEpisode);
+    
+    // Update season selector
+    updateSeasonSelector(seasons, currentEpisode);
     
     // Check if premium episode
     checkPremiumEpisode(currentEpisode);
+}
+
+/**
+ * Update season selector dropdown
+ * @param {Array} seasons - Seasons data
+ * @param {Object} currentEpisode - Current episode data
+ */
+function updateSeasonSelector(seasons, currentEpisode) {
+    const seasonSelector = document.getElementById('season-selector');
+    if (!seasonSelector) return;
+    
+    // Clear previous options
+    seasonSelector.innerHTML = '';
+    
+    // Add options for each season
+    seasons.forEach(season => {
+        const option = document.createElement('option');
+        option.value = season.id;
+        option.textContent = `Season ${season.season_number}${season.title ? ': ' + season.title : ''}`;
+        option.selected = season.id == currentEpisode.season_id;
+        seasonSelector.appendChild(option);
+    });
+    
+    // Add change event listener
+    seasonSelector.addEventListener('change', function() {
+        const selectedSeasonId = this.value;
+        const selectedSeason = seasons.find(s => s.id == selectedSeasonId);
+        if (selectedSeason && selectedSeason.episodes && selectedSeason.episodes.length > 0) {
+            // Navigate to the first episode of the selected season
+            window.location.href = `?anime=${currentEpisode.anime_id}&season=${selectedSeasonId}&episode=${selectedSeason.episodes[0].id}`;
+        }
+    });
 }
 
 /**
@@ -276,6 +211,18 @@ function updateEpisodeInfo(episode, anime) {
         animeTitle.textContent = anime.title;
     }
     
+    // Update season title
+    const seasonTitle = document.getElementById('season-title');
+    if (seasonTitle) {
+        // Find the current season
+        const currentSeason = anime.seasons ? anime.seasons.find(s => s.id == episode.season_id) : null;
+        if (currentSeason) {
+            seasonTitle.textContent = currentSeason.title || `Season ${episode.season_number}`;
+        } else {
+            seasonTitle.textContent = `Season ${episode.season_number}`;
+        }
+    }
+    
     // Update episode description
     const episodeDescription = document.getElementById('episode-description');
     if (episodeDescription) {
@@ -284,89 +231,50 @@ function updateEpisodeInfo(episode, anime) {
 }
 
 /**
- * Update seasons list
+ * Update episodes list
  * @param {Array} seasons - Seasons data
  * @param {Object} currentEpisode - Current episode data
  */
-function updateSeasonsList(seasons, currentEpisode) {
-    const seasonsList = document.getElementById('seasons-list');
-    if (!seasonsList) return;
+function updateEpisodesList(seasons, currentEpisode) {
+    const episodesList = document.getElementById('episode-list');
+    if (!episodesList) return;
     
     // Clear previous content
-    seasonsList.innerHTML = '';
+    episodesList.innerHTML = '';
     
-    // Loop through seasons
-    seasons.forEach(season => {
-        // Create season header
-        const seasonHeader = document.createElement('div');
-        seasonHeader.className = 'bg-gray-800 px-4 py-2 cursor-pointer flex justify-between items-center';
-        seasonHeader.innerHTML = `
-            <h3 class="font-medium">Season ${season.season_number}${season.title ? ': ' + season.title : ''}</h3>
-            <svg class="h-5 w-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
+    // Find the current season
+    const currentSeason = seasons.find(season => season.id == currentEpisode.season_id);
+    if (!currentSeason || !currentSeason.episodes) return;
+    
+    // Add episodes from the current season
+    currentSeason.episodes.forEach(episode => {
+        const episodeItem = document.createElement('a');
+        episodeItem.href = `?anime=${currentEpisode.anime_id}&season=${currentSeason.id}&episode=${episode.id}`;
+        episodeItem.className = 'bg-gray-800 hover:bg-gray-700 rounded-lg overflow-hidden transition-all duration-200 flex items-center';
+        
+        // Check if this is the current episode
+        if (episode.id == currentEpisode.id) {
+            episodeItem.classList.add('bg-gray-700', 'ring-2', 'ring-primary-500');
+        }
+        
+        // Check if premium episode
+        const isPremium = episode.is_premium == 1;
+        
+        // Use default image if thumbnail is missing
+        const thumbnailUrl = episode.thumbnail || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="84" viewBox="0 0 150 84"%3E%3Crect width="150" height="84" fill="%23333333"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial" font-size="12" fill="%23ffffff" text-anchor="middle" dominant-baseline="middle"%3EEpisode ' + episode.episode_number + '%3C/text%3E%3C/svg%3E';
+        
+        episodeItem.innerHTML = `
+            <div class="w-16 h-16 flex-shrink-0 relative">
+                <img src="${thumbnailUrl}" alt="Episode ${episode.episode_number}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'150\\' height=\\'84\\' viewBox=\\'0 0 150 84\\'%3E%3Crect width=\\'150\\' height=\\'84\\' fill=\\'%23333333\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-family=\\'Arial\\' font-size=\\'12\\' fill=\\'%23ffffff\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'%3EEpisode ${episode.episode_number}%3C/text%3E%3C/svg%3E'">
+                ${isPremium ? '<span class="absolute top-0 right-0 bg-yellow-600 text-white text-xs px-1 rounded">P</span>' : ''}
+            </div>
+            <div class="p-3 flex-grow">
+                <h4 class="text-sm font-medium truncate">${episode.title}</h4>
+                <p class="text-xs text-gray-400">Episode ${episode.episode_number}${episode.duration ? ' • ' + episode.duration + ' min' : ''}</p>
+            </div>
         `;
         
-        // Create episodes container
-        const episodesContainer = document.createElement('div');
-        episodesContainer.className = 'bg-gray-900';
-        
-        // Check if this is the current season
-        const isCurrentSeason = season.id == currentEpisode.season_id;
-        if (!isCurrentSeason) {
-            episodesContainer.classList.add('hidden');
-        } else {
-            seasonHeader.classList.add('bg-gray-700');
-            seasonHeader.querySelector('svg').classList.add('rotate-180');
-        }
-        
-        // Add episodes
-        if (season.episodes && season.episodes.length > 0) {
-            season.episodes.forEach(episode => {
-                const episodeItem = document.createElement('a');
-                episodeItem.href = `?anime=${currentEpisode.anime_id}&season=${season.id}&episode=${episode.id}`;
-                episodeItem.className = 'flex items-center px-4 py-2 hover:bg-gray-800 border-b border-gray-800';
-                
-                // Check if this is the current episode
-                if (episode.id == currentEpisode.id) {
-                    episodeItem.classList.add('bg-gray-700');
-                }
-                
-                // Check if premium episode
-                const isPremium = episode.is_premium == 1;
-                
-                // Use default image if thumbnail is missing
-                const thumbnailUrl = episode.thumbnail || 'https://via.placeholder.com/150x84?text=Episode';
-                
-                episodeItem.innerHTML = `
-                    <div class="w-10 h-10 flex-shrink-0 mr-3 relative">
-                        <img src="${thumbnailUrl}" alt="Episode ${episode.episode_number}" class="w-full h-full object-cover rounded" onerror="this.src='https://via.placeholder.com/150x84?text=Episode'">
-                        ${isPremium ? '<span class="absolute top-0 right-0 bg-yellow-600 text-white text-xs px-1 rounded">P</span>' : ''}
-                    </div>
-                    <div class="flex-grow">
-                        <h4 class="text-sm font-medium truncate">${episode.title}</h4>
-                        <p class="text-xs text-gray-400">Episode ${episode.episode_number}${episode.duration ? ' • ' + episode.duration + ' min' : ''}</p>
-                    </div>
-                `;
-                
-                episodesContainer.appendChild(episodeItem);
-            });
-        } else {
-            const noEpisodes = document.createElement('div');
-            noEpisodes.className = 'px-4 py-2 text-gray-400 text-sm';
-            noEpisodes.textContent = 'No episodes available';
-            episodesContainer.appendChild(noEpisodes);
-        }
-        
-        // Add click event to toggle episodes
-        seasonHeader.addEventListener('click', () => {
-            episodesContainer.classList.toggle('hidden');
-            seasonHeader.querySelector('svg').classList.toggle('rotate-180');
-        });
-        
-        // Add to seasons list
-        seasonsList.appendChild(seasonHeader);
-        seasonsList.appendChild(episodesContainer);
+        episodesList.appendChild(episodeItem);
     });
 }
 
@@ -426,7 +334,7 @@ function checkPremiumStatus(userId, callback) {
         return;
     }
     
-    // Fetch from server (with error handling for CORS)
+    // Fetch from server
     fetch('https://cdn.glorioustradehub.com/subscription_status.php', {
         method: 'POST',
         headers: {
@@ -455,10 +363,10 @@ function checkPremiumStatus(userId, callback) {
     })
     .catch(error => {
         console.error('Error checking premium status:', error);
-        // For development/testing, assume user has premium to avoid blocking content
-        // In production, you would want to handle this differently
+        
+        // For testing purposes only - assume user has premium
         if (callback) {
-            callback(true); // Temporarily allow access for testing
+            callback(true);
         }
     });
 }
