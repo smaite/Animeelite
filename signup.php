@@ -39,8 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Connect to database
         try {
-            // Use the database credentials from config.php
-            $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+            // IMPORTANT: Use the database credentials from config.php
+            // DO NOT use the form variables for database connection
+            $db_host = $host;         // From config.php
+            $db_name = $dbname;       // From config.php
+            $db_user = $username;     // From config.php
+            $db_pass = $password;     // From config.php
+            
+            $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Check if username already exists
