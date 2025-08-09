@@ -82,6 +82,25 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Create subscription_plans table
+CREATE TABLE IF NOT EXISTS subscription_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
+    price_monthly DECIMAL(10,2) NOT NULL,
+    price_yearly DECIMAL(10,2),
+    features TEXT,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert default subscription plans
+INSERT INTO subscription_plans (name, description, price_monthly, price_yearly, features, is_active) VALUES
+('Free', 'Basic access to free content', 0.00, 0.00, 'Access to free content,Create watchlist', 1),
+('Premium', 'Full access to all content and features', 9.99, 99.99, 'Access to all content,No ads,Early access to new episodes,HD streaming quality', 1),
+('Ultimate', 'Premium features plus exclusive content', 14.99, 149.99, 'All Premium features,4K streaming quality,Offline downloads,Priority customer support', 0);
+
 -- Create coupons table
 CREATE TABLE IF NOT EXISTS coupons (
     id INT AUTO_INCREMENT PRIMARY KEY,

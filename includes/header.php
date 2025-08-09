@@ -1,7 +1,9 @@
 <?php
 // Header template for all pages
 // This file should be included at the top of all PHP pages
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Check if user is logged in and get user data
 $userData = null;

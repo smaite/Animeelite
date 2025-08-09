@@ -2,12 +2,52 @@
 // Database setup script
 require_once 'config.php';
 
-// Enable error display during setup
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// Function to output results as HTML
+function output($message, $success = true) {
+    echo '<div style="margin: 10px; padding: 10px; border-radius: 5px; ' . 
+         'background-color: ' . ($success ? '#d1e7dd' : '#f8d7da') . '; ' .
+         'color: ' . ($success ? '#0f5132' : '#842029') . ';">' . 
+         $message . '</div>';
+}
 
-// Set header for proper HTML rendering
-header('Content-Type: text/html; charset=utf-8');
+try {
+    // Connect to MySQL without selecting a database
+    $pdo = new PDO("mysql:host=$host", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    output("Connected to MySQL server successfully.", true);
+    
+    // Create database if it doesn't exist
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+    output("Database '$dbname' created or already exists.", true);
+    
+    // Select the database
+    $pdo->exec("USE `$dbname`");
+    output("Database '$dbname' selected.", true);
+    
+    // Read SQL file
+    $sql = file_get_contents('db_setup.sql');
+    if (!$sql) {
+        throw new Exception("Could not read db_setup.sql file.");
+    }
+    
+    // Split SQL file into individual statements
+    $statements = array_filter(array_map('trim', explode(';', $sql)));
+    
+    // Execute each statement
+    foreach ($statements as $statement) {
+        if (!empty($statement)) {
+            $pdo->exec($statement);
+        }
+    }
+    
+    output("Database setup completed successfully!", true);
+    
+} catch (PDOException $e) {
+    output("Database Error: " . $e->getMessage(), false);
+} catch (Exception $e) {
+    output("Error: " . $e->getMessage(), false);
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,144 +55,35 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeElite Database Setup</title>
+    <title>AnimeElite Setup</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f0f2f5;
+        }
+        h1 {
             color: #333;
         }
-        h1, h2 {
-            color: #2c3e50;
-            margin-top: 30px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        pre {
-            background: #f8f8f8;
-            padding: 10px;
-            border-radius: 5px;
-            overflow: auto;
-        }
-        .btn {
+        .button {
             display: inline-block;
-            background-color: #3498db;
-            color: white;
             padding: 10px 15px;
+            background-color: #4a5568;
+            color: white;
             text-decoration: none;
             border-radius: 5px;
             margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #2d3748;
         }
     </style>
 </head>
 <body>
     <h1>AnimeElite Database Setup</h1>
-
-<?php
-try {
-    // Connect to MySQL server without selecting a database
-    $conn = new mysqli($host, $username, $password);
-    
-    if ($conn->connect_error) {
-        throw new Exception("MySQL connection failed: " . $conn->connect_error);
-    }
-    
-    echo "<div class='success'>Connected to MySQL server successfully.</div>";
-    
-    // Create database if it doesn't exist
-    $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
-    if ($conn->query($sql) === TRUE) {
-        echo "<div class='success'>Database '$dbname' created successfully or already exists.</div>";
-    } else {
-        throw new Exception("Error creating database: " . $conn->error);
-    }
-    
-    // Select the database
-    $conn->select_db($dbname);
-    echo "<div class='info'>Using database: $dbname</div>";
-    
-    // Read SQL file
-    $sql_file = file_get_contents('db_setup.sql');
-    if (!$sql_file) {
-        throw new Exception("Could not read db_setup.sql file.");
-    }
-    
-    echo "<div class='info'>Successfully read SQL setup file.</div>";
-    
-    // Execute SQL statements
-    $statements = explode(';', $sql_file);
-    foreach ($statements as $statement) {
-        $statement = trim($statement);
-        if (!empty($statement)) {
-            if ($conn->query($statement) === FALSE) {
-                throw new Exception("Error executing SQL statement: " . $conn->error . "<br>Statement: " . htmlspecialchars($statement));
-            }
-        }
-    }
-    
-    echo "<div class='success'>Database setup completed successfully!</div>";
-    
-    // Check if tables were created
-    $tables = ['anime', 'seasons', 'episodes', 'users', 'sessions', 'subscriptions', 'coupons', 'watch_history', 'favorites'];
-    echo "<h2>Database Tables Status:</h2>";
-    echo "<ul>";
-    foreach ($tables as $table) {
-        $result = $conn->query("SHOW TABLES LIKE '$table'");
-        if ($result->num_rows > 0) {
-            // Count rows
-            $count_result = $conn->query("SELECT COUNT(*) as count FROM $table");
-            $count = $count_result->fetch_assoc()['count'];
-            echo "<li>Table '$table': <strong>Created</strong> ($count records)</li>";
-        } else {
-            echo "<li>Table '$table': <strong style='color:red'>Not created</strong></li>";
-        }
-    }
-    echo "</ul>";
-    
-    // Close connection
-    $conn->close();
-    
-    echo "<div class='info'>You can now use the AnimeElite website. <a href='index.php' class='btn'>Go to Homepage</a></div>";
-    
-} catch (Exception $e) {
-    echo "<div class='error'>";
-    echo "<h2>Error:</h2>";
-    echo "<p>" . $e->getMessage() . "</p>";
-    echo "</div>";
-    
-    echo "<div class='info'>";
-    echo "<h2>Troubleshooting:</h2>";
-    echo "<ol>";
-    echo "<li>Check that your MySQL server is running</li>";
-    echo "<li>Verify the credentials in config.php are correct</li>";
-    echo "<li>Make sure the web server has permissions to create databases</li>";
-    echo "<li>Check for any syntax errors in db_setup.sql</li>";
-    echo "</ol>";
-    echo "</div>";
-}
-?>
-
+    <p>The setup process has been completed. You can now navigate to the homepage.</p>
+    <a href="index.php" class="button">Go to Homepage</a>
 </body>
 </html> 

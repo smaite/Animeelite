@@ -174,9 +174,28 @@ try {
         }
     }
     
-    // Get subscription plans
-    $stmt = $pdo->query("SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY price_monthly");
-    $plans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // We don't need to query subscription_plans table as it doesn't exist
+    // Instead, we'll use hardcoded plans
+    $plans = [
+        [
+            'name' => 'Free',
+            'description' => 'Basic access to free content',
+            'price_monthly' => 0.00,
+            'features' => 'Access to free content,Create watchlist'
+        ],
+        [
+            'name' => 'Premium',
+            'description' => 'Full access to all content and features',
+            'price_monthly' => 9.99,
+            'features' => 'Access to all content,No ads,Early access to new episodes,HD streaming quality'
+        ],
+        [
+            'name' => 'Ultimate',
+            'description' => 'Premium features plus exclusive content',
+            'price_monthly' => 14.99,
+            'features' => 'All Premium features,4K streaming quality,Offline downloads,Priority customer support'
+        ]
+    ];
     
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
