@@ -1,5 +1,5 @@
 <?php
-// Script to clean up duplicate seasons
+// Script to fix duplicate seasons
 require_once 'config.php';
 
 try {
@@ -9,59 +9,54 @@ try {
     echo "<h1>Fixing Duplicate Seasons</h1>";
     
     // Get all anime
-    $stmt = $pdo->query("SELECT id, title FROM anime");
+    $stmt = $pdo->query("SELECT id, title FROM anime ORDER BY title");
     $animes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     foreach ($animes as $anime) {
-        echo "<h2>Processing anime: " . htmlspecialchars($anime['title']) . " (ID: {$anime['id']})</h2>";
+        echo "<h2>Processing: " . htmlspecialchars($anime['title']) . " (ID: {$anime['id']})</h2>";
         
-        // Get all seasons for this anime
-        $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number, id");
+        // Find duplicate season numbers for this anime
+        $stmt = $pdo->prepare("
+            SELECT season_number, COUNT(*) as count, GROUP_CONCAT(id) as season_ids 
+            FROM seasons 
+            WHERE anime_id = ? 
+            GROUP BY season_number 
+            HAVING COUNT(*) > 1
+        ");
         $stmt->execute([$anime['id']]);
-        $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $duplicates = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Group seasons by season_number
-        $seasonGroups = [];
-        foreach ($seasons as $season) {
-            $seasonNumber = $season['season_number'];
-            if (!isset($seasonGroups[$seasonNumber])) {
-                $seasonGroups[$seasonNumber] = [];
-            }
-            $seasonGroups[$seasonNumber][] = $season;
-        }
-        
-        // Process each group of seasons
-        foreach ($seasonGroups as $seasonNumber => $seasonGroup) {
-            if (count($seasonGroup) > 1) {
-                echo "<p>Found " . count($seasonGroup) . " duplicate seasons for Season $seasonNumber</p>";
+        if (count($duplicates) > 0) {
+            echo "<p>Found duplicate seasons:</p>";
+            
+            foreach ($duplicates as $duplicate) {
+                $seasonNumber = $duplicate['season_number'];
+                $seasonIds = explode(',', $duplicate['season_ids']);
                 
-                // Keep the first season, merge episodes from others
-                $keepSeason = $seasonGroup[0];
-                echo "<p>Keeping season ID: {$keepSeason['id']}</p>";
+                echo "<p>Season $seasonNumber has " . $duplicate['count'] . " entries (IDs: " . implode(', ', $seasonIds) . ")</p>";
                 
-                // Process other seasons
-                for ($i = 1; $i < count($seasonGroup); $i++) {
-                    $mergeSeason = $seasonGroup[$i];
-                    echo "<p>Merging season ID: {$mergeSeason['id']} into {$keepSeason['id']}</p>";
-                    
-                    // Update episodes to point to the kept season
+                // Keep the first season, merge episodes from others, then delete duplicates
+                $keepSeasonId = $seasonIds[0];
+                $deleteSeasonIds = array_slice($seasonIds, 1);
+                
+                foreach ($deleteSeasonIds as $deleteId) {
+                    // Move episodes from duplicate season to the main one
                     $stmt = $pdo->prepare("UPDATE episodes SET season_id = ? WHERE season_id = ?");
-                    $stmt->execute([$keepSeason['id'], $mergeSeason['id']]);
-                    $updatedCount = $stmt->rowCount();
-                    echo "<p>Updated $updatedCount episodes</p>";
+                    $stmt->execute([$keepSeasonId, $deleteId]);
+                    echo "<p>Moved episodes from season ID $deleteId to $keepSeasonId</p>";
                     
                     // Delete the duplicate season
                     $stmt = $pdo->prepare("DELETE FROM seasons WHERE id = ?");
-                    $stmt->execute([$mergeSeason['id']]);
-                    echo "<p>Deleted season ID: {$mergeSeason['id']}</p>";
+                    $stmt->execute([$deleteId]);
+                    echo "<p>Deleted duplicate season ID $deleteId</p>";
                 }
-            } else {
-                echo "<p>Season $seasonNumber has no duplicates</p>";
             }
+        } else {
+            echo "<p>No duplicate seasons found</p>";
         }
     }
     
-    echo "<h2>Cleanup complete!</h2>";
+    echo "<h2>All duplicates fixed!</h2>";
     
 } catch (PDOException $e) {
     echo "<h2>Database error:</h2>";
