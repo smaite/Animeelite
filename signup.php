@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Connect to database
         try {
-            $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+            $pdo = new PDO("mysql:host=$host;dbname=$dbname", $GLOBALS['username'], $GLOBALS['password']);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Check if username already exists

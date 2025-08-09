@@ -91,6 +91,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <i class="fas fa-users w-5 mr-3"></i>
                 <span>Users</span>
             </a>
+            <a href="user_promotion.php" class="flex items-center py-2 px-4 text-gray-300 hover:text-white rounded-md mb-1 <?= $current_page === 'user_promotion.php' ? 'bg-gray-700 text-white' : '' ?>">
+                <i class="fas fa-crown w-5 mr-3"></i>
+                <span>Premium Promotion</span>
+            </a>
             <a href="coupon_management.php" class="flex items-center py-2 px-4 text-gray-300 hover:text-white rounded-md mb-1 <?= $current_page === 'coupon_management.php' ? 'bg-gray-700 text-white' : '' ?>">
                 <i class="fas fa-ticket-alt w-5 mr-3"></i>
                 <span>Coupons</span>
@@ -169,6 +173,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <a href="user_management.php" class="flex items-center py-2 px-4 text-gray-300 hover:text-white rounded-md mb-1 <?= $current_page === 'user_management.php' ? 'bg-gray-700 text-white' : '' ?>">
                             <i class="fas fa-users w-5 mr-3"></i>
                             <span>Users</span>
+                        </a>
+                        <a href="user_promotion.php" class="flex items-center py-2 px-4 text-gray-300 hover:text-white rounded-md mb-1 <?= $current_page === 'user_promotion.php' ? 'bg-gray-700 text-white' : '' ?>">
+                            <i class="fas fa-crown w-5 mr-3"></i>
+                            <span>Premium Promotion</span>
                         </a>
                         <a href="coupon_management.php" class="flex items-center py-2 px-4 text-gray-300 hover:text-white rounded-md mb-1 <?= $current_page === 'coupon_management.php' ? 'bg-gray-700 text-white' : '' ?>">
                             <i class="fas fa-ticket-alt w-5 mr-3"></i>
