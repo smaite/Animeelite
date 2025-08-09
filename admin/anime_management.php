@@ -110,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Get form data
         $anime_id = intval($_POST['anime_id']);
         $season_number = intval($_POST['season_number']);
-        $part_number = intval($_POST['part_number'] ?? 1);
         $title = trim($_POST['season_title']);
         $description = trim($_POST['description']);
         $release_year = trim($_POST['release_year']);
@@ -122,17 +121,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Season number must be greater than 0.";
         } else {
             try {
-                // Check if season number and part number combination already exists for this anime
-                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND part_number = ?");
-                $stmt->execute([$anime_id, $season_number, $part_number]);
+                // Check if season number already exists for this anime
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ?");
+                $stmt->execute([$anime_id, $season_number]);
                 
                 if ($stmt->rowCount() > 0) {
-                    $error = "Season number and part combination already exists for this anime.";
+                    $error = "Season number already exists for this anime.";
                 } else {
                     // Insert new season
-                    $stmt = $pdo->prepare("INSERT INTO seasons (anime_id, season_number, part_number, title, description, release_year) 
-                                          VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([$anime_id, $season_number, $part_number, $title, $description, $release_year]);
+                    $stmt = $pdo->prepare("INSERT INTO seasons (anime_id, season_number, title, description, release_year) 
+                                          VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$anime_id, $season_number, $title, $description, $release_year]);
                     
                     $success = "Season added successfully.";
                     
@@ -149,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $season_id = intval($_POST['season_id']);
         $anime_id = intval($_POST['anime_id']);
         $season_number = intval($_POST['season_number']);
-        $part_number = intval($_POST['part_number'] ?? 1);
         $title = trim($_POST['season_title']);
         $description = trim($_POST['description']);
         $release_year = trim($_POST['release_year']);
@@ -161,17 +159,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Season number must be greater than 0.";
         } else {
             try {
-                // Check if season number and part number combination already exists for this anime (excluding current season)
-                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND part_number = ? AND id != ?");
-                $stmt->execute([$anime_id, $season_number, $part_number, $season_id]);
+                // Check if season number already exists for this anime (excluding current season)
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND id != ?");
+                $stmt->execute([$anime_id, $season_number, $season_id]);
                 
                 if ($stmt->rowCount() > 0) {
-                    $error = "Season number and part combination already exists for this anime.";
+                    $error = "Season number already exists for this anime.";
                 } else {
                     // Update season
-                    $stmt = $pdo->prepare("UPDATE seasons SET season_number = ?, part_number = ?, title = ?, description = ?, release_year = ? 
+                    $stmt = $pdo->prepare("UPDATE seasons SET season_number = ?, title = ?, description = ?, release_year = ? 
                                           WHERE id = ? AND anime_id = ?");
-                    $stmt->execute([$season_number, $part_number, $title, $description, $release_year, $season_id, $anime_id]);
+                    $stmt->execute([$season_number, $title, $description, $release_year, $season_id, $anime_id]);
                     
                     $success = "Season updated successfully.";
                     
@@ -842,8 +840,7 @@ try {
         <div @click="open = !open" class="flex justify-between items-center p-4 cursor-pointer bg-gray-700 hover:bg-gray-600 transition-colors">
             <div class="flex items-center">
                 <span class="text-lg font-medium">
-                    Season <?= htmlspecialchars($season['season_number']) ?>
-                    <?= $season['part_number'] > 1 ? ' Part ' . htmlspecialchars($season['part_number']) : '' ?>: 
+                    Season <?= htmlspecialchars($season['season_number']) ?>: 
                     <?= htmlspecialchars($season['title'] ?? 'Untitled') ?>
                 </span>
                 <span class="ml-4 text-sm text-gray-400"><?= $season['episode_count'] ?> episode<?= $season['episode_count'] !== 1 ? 's' : '' ?></span>
@@ -977,13 +974,6 @@ try {
                 </div>
                 
                 <div class="mb-4">
-                    <label for="part_number" class="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
-                    <input type="number" min="1" id="part_number" name="part_number" value="1"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
-                    <p class="text-xs text-gray-400 mt-1">Use for multiple parts within a season (default: 1)</p>
-                </div>
-                
-                <div class="mb-4">
                     <label for="season_title" class="block text-sm font-medium text-gray-300 mb-2">Season Title</label>
                     <input type="text" id="season_title" name="season_title" 
                         class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
@@ -1037,13 +1027,6 @@ try {
                     <label for="edit_season_number" class="block text-sm font-medium text-gray-300 mb-2">Season Number *</label>
                     <input type="number" min="1" id="edit_season_number" name="season_number" required
                         class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="edit_part_number" class="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
-                    <input type="number" min="1" id="edit_part_number" name="part_number" value="1"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
-                    <p class="text-xs text-gray-400 mt-1">Use for multiple parts within a season (default: 1)</p>
                 </div>
                 
                 <div class="mb-4">
@@ -1241,7 +1224,6 @@ try {
                     // Populate form fields
                     document.getElementById('edit_season_id').value = data.season.id;
                     document.getElementById('edit_season_number').value = data.season.season_number;
-                    document.getElementById('edit_part_number').value = data.season.part_number || 1;
                     document.getElementById('edit_season_title').value = data.season.title || '';
                     document.getElementById('edit_release_year').value = data.season.release_year || '';
                     document.getElementById('edit_description').value = data.season.description || '';

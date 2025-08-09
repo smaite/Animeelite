@@ -22,6 +22,7 @@ if (isset($_SESSION['user_id'])) {
 // Get URL parameters
 $animeId = isset($_GET['anime']) ? intval($_GET['anime']) : 0;
 $seasonId = isset($_GET['season']) ? intval($_GET['season']) : 0;
+$seasonNumber = isset($_GET['season_number']) ? intval($_GET['season_number']) : 0;
 $episodeId = isset($_GET['episode']) ? intval($_GET['episode']) : 0;
 
 // Initialize variables
@@ -48,22 +49,25 @@ if (!$animeId) {
         } else {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Get seasons for this anime
-            $stmt = $pdo->prepare("SELECT DISTINCT season_number, id, title, part_number FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
+            // Get seasons for this anime - group by season_number to avoid duplicates
+            $stmt = $pdo->prepare("SELECT *, MIN(id) as season_id FROM seasons WHERE anime_id = ? GROUP BY season_number ORDER BY season_number ASC");
             $stmt->execute([$animeId]);
             $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Get episodes for each season
+            // Get episodes for each season (including all parts)
             foreach ($seasons as &$season) {
-                $stmt = $pdo->prepare("SELECT * FROM episodes WHERE season_id = ? ORDER BY episode_number");
-                $stmt->execute([$season['id']]);
+                $stmt = $pdo->prepare("SELECT e.* FROM episodes e 
+                                      JOIN seasons s ON e.season_id = s.id 
+                                      WHERE s.anime_id = ? AND s.season_number = ? 
+                                      ORDER BY e.episode_number");
+                $stmt->execute([$animeId, $season['season_number']]);
                 $season['episodes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
             
             // Get current episode
             if ($episodeId) {
                 // Get specific episode
-                $stmt = $pdo->prepare("SELECT e.*, s.season_number, s.part_number, s.title as season_title 
+                $stmt = $pdo->prepare("SELECT e.*, s.season_number, s.title as season_title 
                                       FROM episodes e 
                                       JOIN seasons s ON e.season_id = s.id 
                                       WHERE e.id = ? AND s.anime_id = ?");
@@ -73,6 +77,20 @@ if (!$animeId) {
                     $currentEpisode = $stmt->fetch(PDO::FETCH_ASSOC);
                 }
             } 
+            
+            // If no episode found yet, try season_number
+            if (!$currentEpisode && $seasonNumber) {
+                $stmt = $pdo->prepare("SELECT e.*, s.season_number, s.title as season_title 
+                                      FROM episodes e 
+                                      JOIN seasons s ON e.season_id = s.id 
+                                      WHERE s.season_number = ? AND s.anime_id = ? 
+                                      ORDER BY e.episode_number LIMIT 1");
+                $stmt->execute([$seasonNumber, $animeId]);
+                
+                if ($stmt->rowCount() === 1) {
+                    $currentEpisode = $stmt->fetch(PDO::FETCH_ASSOC);
+                }
+            }
             
             // If no episode found yet, try season
             if (!$currentEpisode && $seasonId) {
@@ -295,7 +313,7 @@ include 'includes/header.php';
                 <label for="season-selector" class="block text-gray-300 mb-2">Select Season</label>
                 <select id="season-selector" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:border-purple-500">
                     <?php foreach ($seasons as $season): ?>
-                    <option value="<?= $season['id'] ?>" <?= ($currentEpisode && $currentEpisode['season_id'] == $season['id']) ? 'selected' : '' ?>>
+                    <option value="<?= $season['season_number'] ?>" <?= ($currentEpisode && $currentEpisode['season_number'] == $season['season_number']) ? 'selected' : '' ?>>
                         Season <?= $season['season_number'] ?>
                         <?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?>
                     </option>
@@ -315,11 +333,11 @@ include 'includes/header.php';
                 
                 <div id="episode-list" class="space-y-3">
                     <?php 
-                    $currentSeasonId = $currentEpisode ? $currentEpisode['season_id'] : ($seasons[0]['id'] ?? 0);
+                    $currentSeasonNumber = $currentEpisode ? $currentEpisode['season_number'] : ($seasons[0]['season_number'] ?? 1);
                     $currentSeasonEpisodes = [];
                     
                     foreach ($seasons as $season) {
-                        if ($season['id'] == $currentSeasonId) {
+                        if ($season['season_number'] == $currentSeasonNumber) {
                             $currentSeasonEpisodes = $season['episodes'];
                             break;
                         }
@@ -330,7 +348,7 @@ include 'includes/header.php';
                     <div class="text-center py-8 text-gray-400">No episodes available for this season.</div>
                     <?php else: ?>
                         <?php foreach ($currentSeasonEpisodes as $episode): ?>
-                        <a href="?anime=<?= $animeId ?>&season=<?= $episode['season_id'] ?>&episode=<?= $episode['id'] ?>" 
+                        <a href="?anime=<?= $animeId ?>&episode=<?= $episode['id'] ?>" 
                            class="bg-gray-700 hover:bg-gray-600 rounded-lg overflow-hidden transition-all duration-200 flex items-center 
                                  <?= ($currentEpisode && $currentEpisode['id'] == $episode['id']) ? 'bg-gray-600 ring-2 ring-purple-500' : '' ?>">
                             <div class="w-16 h-16 flex-shrink-0 relative bg-gray-600">
@@ -362,7 +380,9 @@ include 'includes/header.php';
         
         if (seasonSelector) {
             seasonSelector.addEventListener('change', function() {
-                window.location.href = `player.php?anime=<?= $animeId ?>&season=${this.value}`;
+                // Get the first episode of the selected season
+                const seasonNumber = this.value;
+                window.location.href = `player.php?anime=<?= $animeId ?>&season_number=${seasonNumber}`;
             });
         }
         
