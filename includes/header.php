@@ -95,13 +95,22 @@ if (!isset($pageTitle)) {
         function updateUserActivity() {
             fetch('update_activity.php')
                 .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.status === 'online') {
+                        console.log('Online status updated');
+                    }
+                })
                 .catch(error => console.error('Error updating activity status:', error));
         }
         
         // Update immediately and then every 2 minutes
         document.addEventListener('DOMContentLoaded', function() {
-            updateUserActivity();
-            setInterval(updateUserActivity, 120000); // 2 minutes
+            // Check if we're on the player page
+            const currentPage = window.location.pathname.split('/').pop();
+            if (currentPage === 'player.php') {
+                updateUserActivity();
+                setInterval(updateUserActivity, 120000); // 2 minutes
+            }
         });
     </script>
     <?php endif; ?>
