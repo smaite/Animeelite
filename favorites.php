@@ -99,7 +99,7 @@ include 'includes/header.php';
                     </div>
                     <?php endif; ?>
                     
-                    <?php if ($anime['is_premium'] == 1): ?>
+                    <?php if (isset($anime['is_premium']) && $anime['is_premium'] == 1): ?>
                     <div class="absolute top-2 right-2 bg-yellow-500 text-xs font-bold px-2 py-1 rounded text-black">PREMIUM</div>
                     <?php endif; ?>
                 </div>
