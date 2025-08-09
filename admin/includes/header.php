@@ -134,7 +134,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="flex items-center ml-auto">
                 <span class="mr-2"><?= htmlspecialchars($admin_data['display_name'] ?? $admin_data['username'] ?? 'Admin') ?></span>
                 <?php if (isset($admin_data['avatar']) && $admin_data['avatar']): ?>
-                    <img src="<?= htmlspecialchars($admin_data['avatar']) ?>" alt="Avatar" class="w-8 h-8 rounded-full">
+                    <img src="../<?= htmlspecialchars($admin_data['avatar']) ?>" alt="Avatar" class="w-8 h-8 rounded-full">
                 <?php else: ?>
                     <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center">
                         <span class="text-white text-sm font-medium">
