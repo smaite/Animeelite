@@ -112,7 +112,7 @@ include 'includes/header.php';
             <?php foreach($featuredAnime as $anime): ?>
             <div class="bg-gray-800 rounded-lg overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
                 <a href="anime.php?id=<?= $anime['id'] ?>">
-                    <div class="aspect-w-16 aspect-h-9 h-48">
+                    <div class="aspect-h-9 h-48">
                         <?php if ($anime['cover_image']): ?>
                             <img src="<?= htmlspecialchars($anime['cover_image']) ?>" alt="<?= htmlspecialchars($anime['title']) ?>" class="object-cover w-full h-full">
                         <?php else: ?>
