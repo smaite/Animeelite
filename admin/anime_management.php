@@ -106,6 +106,166 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
             }
         }
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'add_season') {
+        // Get form data
+        $anime_id = intval($_POST['anime_id']);
+        $season_number = intval($_POST['season_number']);
+        $title = trim($_POST['season_title']);
+        $description = trim($_POST['description']);
+        $release_year = trim($_POST['release_year']);
+        
+        // Validate form data
+        if ($anime_id <= 0) {
+            $error = "Invalid anime ID.";
+        } elseif ($season_number <= 0) {
+            $error = "Season number must be greater than 0.";
+        } else {
+            try {
+                // Check if season number already exists for this anime
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ?");
+                $stmt->execute([$anime_id, $season_number]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $error = "Season number already exists for this anime.";
+                } else {
+                    // Insert new season
+                    $stmt = $pdo->prepare("INSERT INTO seasons (anime_id, season_number, title, description, release_year) 
+                                          VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$anime_id, $season_number, $title, $description, $release_year]);
+                    
+                    $success = "Season added successfully.";
+                    
+                    // Redirect back to seasons view
+                    header("Location: anime_management.php?action=seasons&id=$anime_id&success=season_added");
+                    exit;
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'edit_season') {
+        // Get form data
+        $season_id = intval($_POST['season_id']);
+        $anime_id = intval($_POST['anime_id']);
+        $season_number = intval($_POST['season_number']);
+        $title = trim($_POST['season_title']);
+        $description = trim($_POST['description']);
+        $release_year = trim($_POST['release_year']);
+        
+        // Validate form data
+        if ($season_id <= 0 || $anime_id <= 0) {
+            $error = "Invalid season or anime ID.";
+        } elseif ($season_number <= 0) {
+            $error = "Season number must be greater than 0.";
+        } else {
+            try {
+                // Check if season number already exists for this anime (excluding current season)
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND id != ?");
+                $stmt->execute([$anime_id, $season_number, $season_id]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $error = "Season number already exists for this anime.";
+                } else {
+                    // Update season
+                    $stmt = $pdo->prepare("UPDATE seasons SET season_number = ?, title = ?, description = ?, release_year = ? 
+                                          WHERE id = ? AND anime_id = ?");
+                    $stmt->execute([$season_number, $title, $description, $release_year, $season_id, $anime_id]);
+                    
+                    $success = "Season updated successfully.";
+                    
+                    // Redirect back to seasons view
+                    header("Location: anime_management.php?action=seasons&id=$anime_id&success=season_updated");
+                    exit;
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'add_episode') {
+        // Get form data
+        $season_id = intval($_POST['season_id']);
+        $anime_id = intval($_POST['anime_id']);
+        $episode_number = intval($_POST['episode_number']);
+        $title = trim($_POST['episode_title']);
+        $description = trim($_POST['description']);
+        $duration = intval($_POST['duration']);
+        $video_url = trim($_POST['video_url']);
+        $is_premium = isset($_POST['is_premium']) ? 1 : 0;
+        
+        // Validate form data
+        if ($season_id <= 0 || $anime_id <= 0) {
+            $error = "Invalid season or anime ID.";
+        } elseif ($episode_number <= 0) {
+            $error = "Episode number must be greater than 0.";
+        } elseif (empty($video_url)) {
+            $error = "Video URL is required.";
+        } else {
+            try {
+                // Check if episode number already exists for this season
+                $stmt = $pdo->prepare("SELECT id FROM episodes WHERE season_id = ? AND episode_number = ?");
+                $stmt->execute([$season_id, $episode_number]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $error = "Episode number already exists for this season.";
+                } else {
+                    // Insert new episode
+                    $stmt = $pdo->prepare("INSERT INTO episodes (season_id, episode_number, title, description, duration, video_url, is_premium) 
+                                          VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$season_id, $episode_number, $title, $description, $duration, $video_url, $is_premium]);
+                    
+                    $success = "Episode added successfully.";
+                    
+                    // Redirect back to seasons view
+                    header("Location: anime_management.php?action=seasons&id=$anime_id&success=episode_added");
+                    exit;
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'edit_episode') {
+        // Get form data
+        $episode_id = intval($_POST['episode_id']);
+        $season_id = intval($_POST['season_id']);
+        $anime_id = intval($_POST['anime_id']);
+        $episode_number = intval($_POST['episode_number']);
+        $title = trim($_POST['episode_title']);
+        $description = trim($_POST['description']);
+        $duration = intval($_POST['duration']);
+        $video_url = trim($_POST['video_url']);
+        $is_premium = isset($_POST['is_premium']) ? 1 : 0;
+        
+        // Validate form data
+        if ($episode_id <= 0 || $season_id <= 0 || $anime_id <= 0) {
+            $error = "Invalid episode, season, or anime ID.";
+        } elseif ($episode_number <= 0) {
+            $error = "Episode number must be greater than 0.";
+        } elseif (empty($video_url)) {
+            $error = "Video URL is required.";
+        } else {
+            try {
+                // Check if episode number already exists for this season (excluding current episode)
+                $stmt = $pdo->prepare("SELECT id FROM episodes WHERE season_id = ? AND episode_number = ? AND id != ?");
+                $stmt->execute([$season_id, $episode_number, $episode_id]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $error = "Episode number already exists for this season.";
+                } else {
+                    // Update episode
+                    $stmt = $pdo->prepare("UPDATE episodes SET episode_number = ?, title = ?, description = ?, 
+                                          duration = ?, video_url = ?, is_premium = ? WHERE id = ? AND season_id = ?");
+                    $stmt->execute([$episode_number, $title, $description, $duration, $video_url, $is_premium, $episode_id, $season_id]);
+                    
+                    $success = "Episode updated successfully.";
+                    
+                    // Redirect back to seasons view
+                    header("Location: anime_management.php?action=seasons&id=$anime_id&success=episode_updated");
+                    exit;
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
     }
 }
 
@@ -187,12 +347,79 @@ try {
     $error = "Database error: " . $e->getMessage();
 }
 
+// Handle delete season action
+if ($action === 'delete_season' && isset($_GET['id']) && isset($_GET['anime_id'])) {
+    $season_id = intval($_GET['id']);
+    $anime_id = intval($_GET['anime_id']);
+    
+    if ($season_id > 0 && $anime_id > 0) {
+        try {
+            // Start transaction
+            $pdo->beginTransaction();
+            
+            // Delete episodes first
+            $stmt = $pdo->prepare("DELETE FROM episodes WHERE season_id = ?");
+            $stmt->execute([$season_id]);
+            
+            // Delete season
+            $stmt = $pdo->prepare("DELETE FROM seasons WHERE id = ? AND anime_id = ?");
+            $stmt->execute([$season_id, $anime_id]);
+            
+            // Commit transaction
+            $pdo->commit();
+            
+            $success = "Season and all its episodes deleted successfully.";
+            header("Location: anime_management.php?action=seasons&id=$anime_id&success=season_deleted");
+            exit;
+        } catch (PDOException $e) {
+            // Rollback transaction on error
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            $error = "Error deleting season: " . $e->getMessage();
+        }
+    }
+}
+
+// Handle delete episode action
+if ($action === 'delete_episode' && isset($_GET['id']) && isset($_GET['season_id']) && isset($_GET['anime_id'])) {
+    $episode_id = intval($_GET['id']);
+    $season_id = intval($_GET['season_id']);
+    $anime_id = intval($_GET['anime_id']);
+    
+    if ($episode_id > 0 && $season_id > 0 && $anime_id > 0) {
+        try {
+            // Delete episode
+            $stmt = $pdo->prepare("DELETE FROM episodes WHERE id = ? AND season_id = ?");
+            $stmt->execute([$episode_id, $season_id]);
+            
+            $success = "Episode deleted successfully.";
+            header("Location: anime_management.php?action=seasons&id=$anime_id&success=episode_deleted");
+            exit;
+        } catch (PDOException $e) {
+            $error = "Error deleting episode: " . $e->getMessage();
+        }
+    }
+}
+
 // Check for success message in URL
 if (isset($_GET['success'])) {
     if ($_GET['success'] === 'updated') {
         $success = "Anime updated successfully.";
     } elseif ($_GET['success'] === 'deleted') {
         $success = "Anime deleted successfully.";
+    } elseif ($_GET['success'] === 'season_added') {
+        $success = "Season added successfully.";
+    } elseif ($_GET['success'] === 'season_updated') {
+        $success = "Season updated successfully.";
+    } elseif ($_GET['success'] === 'season_deleted') {
+        $success = "Season deleted successfully.";
+    } elseif ($_GET['success'] === 'episode_added') {
+        $success = "Episode added successfully.";
+    } elseif ($_GET['success'] === 'episode_updated') {
+        $success = "Episode updated successfully.";
+    } elseif ($_GET['success'] === 'episode_deleted') {
+        $success = "Episode deleted successfully.";
     }
 }
 ?>
