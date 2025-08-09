@@ -89,6 +89,22 @@ if (!isset($pageTitle)) {
             height: 100%;
         }
     </style>
+    <?php if (isset($_SESSION['user_id'])): ?>
+    <script>
+        // Update user activity status every 2 minutes
+        function updateUserActivity() {
+            fetch('update_activity.php')
+                .then(response => response.json())
+                .catch(error => console.error('Error updating activity status:', error));
+        }
+        
+        // Update immediately and then every 2 minutes
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserActivity();
+            setInterval(updateUserActivity, 120000); // 2 minutes
+        });
+    </script>
+    <?php endif; ?>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
     <!-- Header -->

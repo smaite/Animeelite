@@ -192,7 +192,8 @@ try {
     
     // Get users list with subscription info
     $stmt = $pdo->prepare("SELECT u.*, 
-                          (SELECT COUNT(*) FROM subscriptions s WHERE s.user_id = u.id AND s.status = 'active' AND s.end_date > NOW()) as has_subscription 
+                          (SELECT COUNT(*) FROM subscriptions s WHERE s.user_id = u.id AND s.status = 'active' AND s.end_date > NOW()) as has_subscription,
+                          (u.last_active IS NOT NULL AND u.last_active > DATE_SUB(NOW(), INTERVAL 5 MINUTE)) as is_online
                           FROM users u
                           ORDER BY u.created_at DESC
                           LIMIT ? OFFSET ?");
@@ -474,10 +475,10 @@ if (isset($_GET['success'])) {
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <?php if ($user['has_subscription']): ?>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-800 text-green-100">Premium</span>
+                            <?php if ($user['is_online']): ?>
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-800 text-green-100">Online</span>
                             <?php else: ?>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-700 text-gray-300">Free</span>
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-700 text-gray-300">Offline</span>
                             <?php endif; ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
