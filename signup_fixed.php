@@ -99,23 +99,7 @@ include 'includes/header.php';
         </div>
         <?php endif; ?>
         
-        <?php if ($success): ?>
-        <div class="bg-green-900 text-white p-4 rounded-md mb-6 border-l-4 border-green-600">
-            <div class="flex items-center">
-                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <div>
-                    <p class="font-medium"><?= htmlspecialchars($success) ?></p>
-                    <p class="mt-2">
-                        <a href="login.php" class="underline">Click here to log in</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <?php else: ?>
-        
-        <form action="signup.php" method="post">
+        <form action="signup_fixed.php" method="post">
             <div class="mb-4">
                 <label for="username" class="block text-gray-300 mb-2">Username</label>
                 <input type="text" id="username" name="username" value="<?= htmlspecialchars($form_username) ?>" required
@@ -153,7 +137,6 @@ include 'includes/header.php';
                 Sign Up
             </button>
         </form>
-        <?php endif; ?>
         
         <div class="mt-6 text-center">
             <p class="text-gray-400">Already have an account? <a href="login.php" class="text-purple-400 hover:text-purple-300">Sign in</a></p>
