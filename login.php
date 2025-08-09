@@ -23,14 +23,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username) || empty($password)) {
         $error = "Please enter both username and password.";
     } else {
-        // Connect to database
+        // Connect to database using config variables
         try {
+            $db_username = $username; // Store the form username
             $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Get user from database
             $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
-            $stmt->execute([$username]);
+            $stmt->execute([$db_username]); // Use the stored username
             
             if ($stmt->rowCount() > 0) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -66,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error = "Invalid username or password.";
             }
         } catch (PDOException $e) {
-            $error = "Server error. Please try again later.";
+            $error = "Server error: " . $e->getMessage();
         }
     }
 }
