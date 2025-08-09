@@ -59,7 +59,7 @@ if (!$anime_id) {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Get seasons for this anime
-            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number");
+            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number, part_number");
             $stmt->execute([$anime_id]);
             $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -166,7 +166,7 @@ include 'includes/header.php';
                 <?php foreach ($seasons as $season): ?>
                 <div class="bg-gray-800 rounded-lg overflow-hidden mb-6">
                     <div class="p-4 bg-gray-700">
-                        <h3 class="text-lg font-medium">Season <?= $season['season_number'] ?><?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?></h3>
+                        <h3 class="text-lg font-medium">Season <?= $season['season_number'] ?><?= $season['part_number'] > 1 ? ' Part ' . $season['part_number'] : '' ?><?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?></h3>
                     </div>
                     
                     <?php if (empty($season['episodes'])): ?>
