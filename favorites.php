@@ -47,7 +47,10 @@ try {
                           WHERE f.user_id = ? 
                           ORDER BY f.added_at DESC
                           LIMIT ? OFFSET ?");
-    $stmt->execute([$_SESSION['user_id'], $limit, $offset]);
+    $stmt->bindParam(1, $_SESSION['user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(2, $limit, PDO::PARAM_INT);
+    $stmt->bindParam(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
