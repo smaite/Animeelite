@@ -147,30 +147,32 @@ include 'includes/header.php';
         <!-- Video player and episode info (2/3 width on desktop) -->
         <div class="md:col-span-2">
             <!-- Video player -->
-            <div id="player-container" class="relative bg-gray-900 rounded-lg overflow-hidden mb-6 aspect-w-16 aspect-h-9">
-                <?php if ($isPremiumEpisode && !$userHasPremium): ?>
-                <!-- Premium episode overlay -->
-                <div class="premium-overlay absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-10 p-4">
-                    <svg class="h-16 w-16 text-yellow-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                    <h3 class="text-xl font-bold text-white mb-2">Premium Episode</h3>
-                    <p class="text-gray-300 text-center mb-4">This episode is only available for premium subscribers.</p>
-                    <a href="subscription.php" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200">
-                        Upgrade to Premium
-                    </a>
+            <div id="player-container" class="relative bg-gray-900 rounded-lg overflow-hidden mb-6">
+                <div class="aspect-w-16">
+                    <?php if ($isPremiumEpisode && !$userHasPremium): ?>
+                    <!-- Premium episode overlay -->
+                    <div class="premium-overlay absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-10 p-4">
+                        <svg class="h-16 w-16 text-yellow-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-white mb-2">Premium Episode</h3>
+                        <p class="text-gray-300 text-center mb-4">This episode is only available for premium subscribers.</p>
+                        <a href="subscription.php" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200">
+                            Upgrade to Premium
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($currentEpisode): ?>
+                    <iframe id="video-player" src="<?= htmlspecialchars($currentEpisode['video_url']) ?>" 
+                        class="<?= ($isPremiumEpisode && !$userHasPremium) ? 'opacity-20' : '' ?>"
+                        allowfullscreen frameborder="0"></iframe>
+                    <?php else: ?>
+                    <div id="player-placeholder" class="bg-gray-800 flex items-center justify-center">
+                        <span class="text-gray-400">No episode selected</span>
+                    </div>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
-                
-                <?php if ($currentEpisode): ?>
-                <iframe id="video-player" src="<?= htmlspecialchars($currentEpisode['video_url']) ?>" 
-                    class="w-full h-full <?= ($isPremiumEpisode && !$userHasPremium) ? 'opacity-20' : '' ?>"
-                    allowfullscreen></iframe>
-                <?php else: ?>
-                <div id="player-placeholder" class="w-full h-full bg-gray-800 flex items-center justify-center">
-                    <span class="text-gray-400">No episode selected</span>
-                </div>
-                <?php endif; ?>
             </div>
             
             <!-- Episode info -->

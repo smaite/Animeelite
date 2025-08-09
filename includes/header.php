@@ -54,6 +54,19 @@ if (!isset($pageTitle)) {
                 opacity: 0.4;
             }
         }
+        /* Video player aspect ratio */
+        .aspect-w-16 {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        .aspect-w-16 iframe,
+        .aspect-w-16 > div {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
