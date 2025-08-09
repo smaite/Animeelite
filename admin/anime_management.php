@@ -110,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Get form data
         $anime_id = intval($_POST['anime_id']);
         $season_number = intval($_POST['season_number']);
+        $part_number = intval($_POST['part_number'] ?? 1);
         $title = trim($_POST['season_title']);
         $description = trim($_POST['description']);
         $release_year = trim($_POST['release_year']);
@@ -121,17 +122,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Season number must be greater than 0.";
         } else {
             try {
-                // Check if season number already exists for this anime
-                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ?");
-                $stmt->execute([$anime_id, $season_number]);
+                // Check if season number and part number combination already exists for this anime
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND part_number = ?");
+                $stmt->execute([$anime_id, $season_number, $part_number]);
                 
                 if ($stmt->rowCount() > 0) {
-                    $error = "Season number already exists for this anime.";
+                    $error = "Season number and part combination already exists for this anime.";
                 } else {
                     // Insert new season
-                    $stmt = $pdo->prepare("INSERT INTO seasons (anime_id, season_number, title, description, release_year) 
-                                          VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$anime_id, $season_number, $title, $description, $release_year]);
+                    $stmt = $pdo->prepare("INSERT INTO seasons (anime_id, season_number, part_number, title, description, release_year) 
+                                          VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$anime_id, $season_number, $part_number, $title, $description, $release_year]);
                     
                     $success = "Season added successfully.";
                     
@@ -148,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $season_id = intval($_POST['season_id']);
         $anime_id = intval($_POST['anime_id']);
         $season_number = intval($_POST['season_number']);
+        $part_number = intval($_POST['part_number'] ?? 1);
         $title = trim($_POST['season_title']);
         $description = trim($_POST['description']);
         $release_year = trim($_POST['release_year']);
@@ -159,17 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Season number must be greater than 0.";
         } else {
             try {
-                // Check if season number already exists for this anime (excluding current season)
-                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND id != ?");
-                $stmt->execute([$anime_id, $season_number, $season_id]);
+                // Check if season number and part number combination already exists for this anime (excluding current season)
+                $stmt = $pdo->prepare("SELECT id FROM seasons WHERE anime_id = ? AND season_number = ? AND part_number = ? AND id != ?");
+                $stmt->execute([$anime_id, $season_number, $part_number, $season_id]);
                 
                 if ($stmt->rowCount() > 0) {
-                    $error = "Season number already exists for this anime.";
+                    $error = "Season number and part combination already exists for this anime.";
                 } else {
                     // Update season
-                    $stmt = $pdo->prepare("UPDATE seasons SET season_number = ?, title = ?, description = ?, release_year = ? 
+                    $stmt = $pdo->prepare("UPDATE seasons SET season_number = ?, part_number = ?, title = ?, description = ?, release_year = ? 
                                           WHERE id = ? AND anime_id = ?");
-                    $stmt->execute([$season_number, $title, $description, $release_year, $season_id, $anime_id]);
+                    $stmt->execute([$season_number, $part_number, $title, $description, $release_year, $season_id, $anime_id]);
                     
                     $success = "Season updated successfully.";
                     
@@ -784,7 +786,7 @@ try {
         $anime = $stmt->fetch(PDO::FETCH_ASSOC);
         
         // Get seasons for this anime
-        $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
+        $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC, part_number ASC");
         $stmt->execute([$anime_id]);
         $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
