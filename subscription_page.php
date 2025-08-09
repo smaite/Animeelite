@@ -20,14 +20,44 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Get user data
-    $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, subscription, subscription_expires FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, username, email, display_name, role FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Get subscription details
-    $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+    // Get subscription details from subscriptions table
+    $stmt = $pdo->prepare("
+        SELECT * FROM subscriptions 
+        WHERE user_id = ? 
+        AND status = 'active' 
+        AND end_date > NOW() 
+        ORDER BY id DESC 
+        LIMIT 1
+    ");
     $stmt->execute([$_SESSION['user_id']]);
-    $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+    $subscriptionData = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Set subscription status
+    $hasActiveSubscription = false;
+    $subscriptionExpired = false;
+    
+    if ($subscriptionData) {
+        $hasActiveSubscription = true;
+    } else {
+        // Check for expired subscription
+        $stmt = $pdo->prepare("
+            SELECT * FROM subscriptions 
+            WHERE user_id = ? 
+            AND (status = 'active' OR status = 'expired')
+            ORDER BY end_date DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        $expiredSubscription = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($expiredSubscription) {
+            $subscriptionExpired = true;
+        }
+    }
     
     // Process coupon form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['coupon_code'])) {
@@ -67,9 +97,7 @@ try {
                         $stmt = $pdo->prepare("INSERT INTO subscriptions (user_id, plan_name, status, start_date, end_date) VALUES (?, 'premium', 'active', ?, ?)");
                         $stmt->execute([$_SESSION['user_id'], $startDate, $endDate]);
                         
-                        // Update user's subscription status
-                        $stmt = $pdo->prepare("UPDATE users SET subscription = 'premium', subscription_updated = NOW(), subscription_expires = ? WHERE id = ?");
-                        $stmt->execute([$endDate, $_SESSION['user_id']]);
+                        // We don't need to update the users table since we don't have subscription columns there
                         
                         // Increment coupon usage count
                         $stmt = $pdo->prepare("UPDATE coupons SET usage_count = usage_count + 1 WHERE id = ?");
@@ -81,12 +109,22 @@ try {
                         $successMessage = "Subscription activated successfully! Your premium access is valid until " . date('F j, Y', strtotime($endDate)) . ".";
                         
                         // Refresh subscription data
-                        $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+                        $stmt = $pdo->prepare("
+                            SELECT * FROM subscriptions 
+                            WHERE user_id = ? 
+                            AND status = 'active' 
+                            AND end_date > NOW() 
+                            ORDER BY id DESC 
+                            LIMIT 1
+                        ");
                         $stmt->execute([$_SESSION['user_id']]);
-                        $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+                        $subscriptionData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        // Update hasActiveSubscription flag
+                        $hasActiveSubscription = ($subscriptionData !== false);
                         
                         // Refresh user data
-                        $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, subscription, subscription_expires FROM users WHERE id = ?");
+                        $stmt = $pdo->prepare("SELECT id, username, email, display_name, role FROM users WHERE id = ?");
                         $stmt->execute([$_SESSION['user_id']]);
                         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
                     } catch (PDOException $e) {
@@ -138,18 +176,6 @@ try {
     
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
-}
-
-// Check subscription status
-$hasActiveSubscription = false;
-$subscriptionExpired = false;
-
-if ($userData && $userData['subscription'] !== 'free') {
-    if ($userData['subscription_expires'] && strtotime($userData['subscription_expires']) > time()) {
-        $hasActiveSubscription = true;
-    } else {
-        $subscriptionExpired = true;
-    }
 }
 
 $pageTitle = "Subscription - AnimeElite";

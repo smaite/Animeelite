@@ -26,7 +26,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Get user data
-    $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, avatar, created_at, subscription, subscription_expires FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, avatar, created_at FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -115,7 +115,7 @@ try {
                         $successMessage = "Profile updated successfully!";
                         
                         // Refresh user data
-                        $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, avatar, created_at, subscription, subscription_expires FROM users WHERE id = ?");
+                        $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, avatar, created_at FROM users WHERE id = ?");
                         $stmt->execute([$_SESSION['user_id']]);
                         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
                     } else {
@@ -125,16 +125,22 @@ try {
             }
         }
         
-        // Get subscription status
-        if (isset($userData['subscription']) && $userData['subscription'] !== 'free') {
-            $subscription['status'] = $userData['subscription'];
-            $subscription['expires'] = $userData['subscription_expires'];
-            $subscription['plan'] = ucfirst($userData['subscription']);
-            
-            // Check if expired
-            if ($subscription['expires'] && strtotime($subscription['expires']) < time()) {
-                $subscription['status'] = 'expired';
-            }
+        // Get subscription status from subscriptions table
+        $stmt = $pdo->prepare("
+            SELECT * FROM subscriptions 
+            WHERE user_id = ? 
+            AND status = 'active' 
+            AND end_date > NOW() 
+            ORDER BY id DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        $subscriptionData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($subscriptionData) {
+            $subscription['status'] = 'premium';
+            $subscription['expires'] = $subscriptionData['end_date'];
+            $subscription['plan'] = ucfirst($subscriptionData['plan_name']);
         }
         
         // Get watch stats
