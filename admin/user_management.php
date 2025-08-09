@@ -333,7 +333,7 @@ if (isset($_GET['success'])) {
     <div class="flex mb-6">
         <div class="w-16 h-16 mr-4 overflow-hidden rounded-full bg-gray-700">
             <?php if ($form_user['avatar']): ?>
-            <img src="<?= htmlspecialchars($form_user['avatar']) ?>" alt="<?= htmlspecialchars($form_user['username']) ?>" class="w-full h-full object-cover">
+            <img src="../<?= htmlspecialchars($form_user['avatar']) ?>" alt="<?= htmlspecialchars($form_user['username']) ?>" class="w-full h-full object-cover">
             <?php else: ?>
             <div class="w-full h-full flex items-center justify-center bg-purple-900">
                 <span class="text-xl font-medium text-white">
