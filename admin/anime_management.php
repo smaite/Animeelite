@@ -946,7 +946,7 @@ try {
 </div>
 <?php endif; ?>
 
-<!-- Add Season Modal (placeholder, will implement functionality later) -->
+<!-- Add Season Modal -->
 <div id="add-season-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
     <div class="absolute inset-0 bg-black bg-opacity-50"></div>
     <div class="relative bg-gray-800 rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-xl">
@@ -1001,27 +1001,286 @@ try {
     </div>
 </div>
 
+<!-- Edit Season Modal -->
+<div id="edit-season-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="relative bg-gray-800 rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-xl font-medium">Edit Season</h3>
+            <button onclick="closeEditSeasonModal()" class="text-gray-400 hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="edit-season-form" action="anime_management.php" method="post">
+            <input type="hidden" name="action" value="edit_season">
+            <input type="hidden" name="anime_id" value="<?= $anime_id ?>">
+            <input type="hidden" name="season_id" id="edit_season_id" value="">
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="edit_season_number" class="block text-sm font-medium text-gray-300 mb-2">Season Number *</label>
+                    <input type="number" min="1" id="edit_season_number" name="season_number" required
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_season_title" class="block text-sm font-medium text-gray-300 mb-2">Season Title</label>
+                    <input type="text" id="edit_season_title" name="season_title" 
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_release_year" class="block text-sm font-medium text-gray-300 mb-2">Release Year</label>
+                    <input type="text" id="edit_release_year" name="release_year" placeholder="YYYY" pattern="[0-9]{4}"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <textarea id="edit_description" name="description" rows="3"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditSeasonModal()" class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                        Update Season
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Episode Modal -->
+<div id="add-episode-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="relative bg-gray-800 rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-xl font-medium">Add New Episode</h3>
+            <button onclick="closeAddEpisodeModal()" class="text-gray-400 hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="add-episode-form" action="anime_management.php" method="post">
+            <input type="hidden" name="action" value="add_episode">
+            <input type="hidden" name="anime_id" value="<?= $anime_id ?>">
+            <input type="hidden" name="season_id" id="add_episode_season_id" value="">
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="episode_number" class="block text-sm font-medium text-gray-300 mb-2">Episode Number *</label>
+                    <input type="number" min="1" id="episode_number" name="episode_number" required
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="episode_title" class="block text-sm font-medium text-gray-300 mb-2">Episode Title</label>
+                    <input type="text" id="episode_title" name="episode_title" 
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="duration" class="block text-sm font-medium text-gray-300 mb-2">Duration (minutes)</label>
+                    <input type="number" min="1" id="duration" name="duration" value="24"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="video_url" class="block text-sm font-medium text-gray-300 mb-2">Video URL *</label>
+                    <input type="url" id="video_url" name="video_url" required
+                        placeholder="https://example.com/video.mp4"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="episode_description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <textarea id="episode_description" name="description" rows="3"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_premium" id="is_premium"
+                            class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 h-5 w-5 bg-gray-700">
+                        <span class="ml-2 text-gray-300">Premium Episode</span>
+                    </label>
+                    <p class="text-xs text-gray-400 mt-1">Premium episodes are only available to subscribers</p>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddEpisodeModal()" class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                        Add Episode
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Episode Modal -->
+<div id="edit-episode-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="relative bg-gray-800 rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-xl font-medium">Edit Episode</h3>
+            <button onclick="closeEditEpisodeModal()" class="text-gray-400 hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="edit-episode-form" action="anime_management.php" method="post">
+            <input type="hidden" name="action" value="edit_episode">
+            <input type="hidden" name="anime_id" value="<?= $anime_id ?>">
+            <input type="hidden" name="season_id" id="edit_episode_season_id" value="">
+            <input type="hidden" name="episode_id" id="edit_episode_id" value="">
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="edit_episode_number" class="block text-sm font-medium text-gray-300 mb-2">Episode Number *</label>
+                    <input type="number" min="1" id="edit_episode_number" name="episode_number" required
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_episode_title" class="block text-sm font-medium text-gray-300 mb-2">Episode Title</label>
+                    <input type="text" id="edit_episode_title" name="episode_title" 
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_duration" class="block text-sm font-medium text-gray-300 mb-2">Duration (minutes)</label>
+                    <input type="number" min="1" id="edit_duration" name="duration"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_video_url" class="block text-sm font-medium text-gray-300 mb-2">Video URL *</label>
+                    <input type="url" id="edit_video_url" name="video_url" required
+                        placeholder="https://example.com/video.mp4"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_episode_description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <textarea id="edit_episode_description" name="description" rows="3"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_premium" id="edit_is_premium"
+                            class="rounded border-gray-600 text-purple-600 focus:ring-purple-500 h-5 w-5 bg-gray-700">
+                        <span class="ml-2 text-gray-300">Premium Episode</span>
+                    </label>
+                    <p class="text-xs text-gray-400 mt-1">Premium episodes are only available to subscribers</p>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditEpisodeModal()" class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                        Update Episode
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    // Placeholder functions for modals - will implement properly later
+    // Season modal functions
     function openAddSeasonModal() {
-        alert("This functionality will be implemented in the next step!");
-        // document.getElementById('add-season-modal').classList.remove('hidden');
+        document.getElementById('add-season-modal').classList.remove('hidden');
     }
     
     function closeAddSeasonModal() {
-        // document.getElementById('add-season-modal').classList.add('hidden');
+        document.getElementById('add-season-modal').classList.add('hidden');
     }
     
     function openEditSeasonModal(seasonId) {
-        alert("Edit season functionality will be implemented in the next step!");
+        // Get season data via AJAX
+        fetch('ajax/get_season.php?id=' + seasonId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate form fields
+                    document.getElementById('edit_season_id').value = data.season.id;
+                    document.getElementById('edit_season_number').value = data.season.season_number;
+                    document.getElementById('edit_season_title').value = data.season.title || '';
+                    document.getElementById('edit_release_year').value = data.season.release_year || '';
+                    document.getElementById('edit_description').value = data.season.description || '';
+                    
+                    // Show modal
+                    document.getElementById('edit-season-modal').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching season data:', error);
+                alert('Failed to load season data. Please try again.');
+            });
     }
     
+    function closeEditSeasonModal() {
+        document.getElementById('edit-season-modal').classList.add('hidden');
+    }
+    
+    // Episode modal functions
     function openAddEpisodeModal(seasonId) {
-        alert("Add episode functionality will be implemented in the next step!");
+        document.getElementById('add_episode_season_id').value = seasonId;
+        document.getElementById('add-episode-modal').classList.remove('hidden');
+    }
+    
+    function closeAddEpisodeModal() {
+        document.getElementById('add-episode-modal').classList.add('hidden');
     }
     
     function openEditEpisodeModal(episodeId) {
-        alert("Edit episode functionality will be implemented in the next step!");
+        // Get episode data via AJAX
+        fetch('ajax/get_episode.php?id=' + episodeId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate form fields
+                    document.getElementById('edit_episode_id').value = data.episode.id;
+                    document.getElementById('edit_episode_season_id').value = data.episode.season_id;
+                    document.getElementById('edit_episode_number').value = data.episode.episode_number;
+                    document.getElementById('edit_episode_title').value = data.episode.title || '';
+                    document.getElementById('edit_duration').value = data.episode.duration || '';
+                    document.getElementById('edit_video_url').value = data.episode.video_url || '';
+                    document.getElementById('edit_episode_description').value = data.episode.description || '';
+                    document.getElementById('edit_is_premium').checked = data.episode.is_premium == 1;
+                    
+                    // Show modal
+                    document.getElementById('edit-episode-modal').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching episode data:', error);
+                alert('Failed to load episode data. Please try again.');
+            });
+    }
+    
+    function closeEditEpisodeModal() {
+        document.getElementById('edit-episode-modal').classList.add('hidden');
     }
 </script>
 
