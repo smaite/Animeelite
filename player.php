@@ -49,9 +49,17 @@ if (!$animeId) {
         } else {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Get seasons for this anime - use MIN(id) to get one season per season_number
-            $stmt = $pdo->prepare("SELECT *, MIN(id) as min_id FROM seasons WHERE anime_id = ? GROUP BY season_number ORDER BY season_number ASC");
-            $stmt->execute([$animeId]);
+            // Get seasons for this anime - get distinct seasons only
+            $stmt = $pdo->prepare("
+                SELECT s.* FROM seasons s
+                WHERE s.anime_id = ? AND s.id IN (
+                    SELECT MIN(id) FROM seasons 
+                    WHERE anime_id = ? 
+                    GROUP BY season_number
+                )
+                ORDER BY s.season_number ASC
+            ");
+            $stmt->execute([$animeId, $animeId]);
             $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Get episodes for each season (including all parts)
