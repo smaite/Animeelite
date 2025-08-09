@@ -146,22 +146,26 @@ try {
             $stmt = $pdo->prepare("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = ? AND status = 'active'");
             $stmt->execute([$_SESSION['user_id']]);
             
-            // Update user record
-            $stmt = $pdo->prepare("UPDATE users SET subscription = 'free' WHERE id = ?");
-            $stmt->execute([$_SESSION['user_id']]);
-            
             // Commit transaction
             $pdo->commit();
             
-            $successMessage = "Your subscription has been cancelled. You will have access until the end of your current billing period.";
+            $successMessage = "Your subscription has been cancelled. You will still have access until the end of your current billing period.";
             
             // Refresh subscription data
-            $stmt = $pdo->prepare("SELECT * FROM subscriptions WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+            $stmt = $pdo->prepare("
+                SELECT * FROM subscriptions 
+                WHERE user_id = ? 
+                AND status = 'active' 
+                AND end_date > NOW() 
+                ORDER BY id DESC 
+                LIMIT 1
+            ");
             $stmt->execute([$_SESSION['user_id']]);
-            $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+            $subscriptionData = $stmt->fetch(PDO::FETCH_ASSOC);
+            $hasActiveSubscription = ($subscriptionData !== false);
             
             // Refresh user data
-            $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, subscription, subscription_expires FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT id, username, email, display_name, role FROM users WHERE id = ?");
             $stmt->execute([$_SESSION['user_id']]);
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -211,7 +215,7 @@ include 'includes/header.php';
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-yellow-400">Premium Subscription Active</h3>
-                    <p class="text-gray-300">Expires on <?= date('F j, Y', strtotime($userData['subscription_expires'])) ?></p>
+                    <p class="text-gray-300">Expires on <?= date('F j, Y', strtotime($subscriptionData['end_date'])) ?></p>
                 </div>
             </div>
             <div class="mt-4">

@@ -1,6 +1,25 @@
 <?php
 // Header template for all pages
 // This file should be included at the top of all PHP pages
+session_start();
+
+// Check if user is logged in and get user data
+$userData = null;
+if (isset($_SESSION['user_id'])) {
+    require_once dirname(__FILE__) . '/../config.php';
+    try {
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $stmt = $pdo->prepare("SELECT id, username, email, display_name, role, avatar FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Just log error and continue
+        error_log("Error fetching user data in header: " . $e->getMessage());
+    }
+}
+
 if (!isset($pageTitle)) {
     $pageTitle = "AnimeElite";
 }
