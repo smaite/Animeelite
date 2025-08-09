@@ -1239,6 +1239,7 @@ try {
                     // Populate form fields
                     document.getElementById('edit_season_id').value = data.season.id;
                     document.getElementById('edit_season_number').value = data.season.season_number;
+                    document.getElementById('edit_part_number').value = data.season.part_number || 1;
                     document.getElementById('edit_season_title').value = data.season.title || '';
                     document.getElementById('edit_release_year').value = data.season.release_year || '';
                     document.getElementById('edit_description').value = data.season.description || '';
