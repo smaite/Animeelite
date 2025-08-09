@@ -1,4 +1,7 @@
 <?php
+// Start output buffering to prevent "headers already sent" errors
+ob_start();
+
 // AJAX endpoint to get season data
 session_start();
 require_once '../../config.php';
