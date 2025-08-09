@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS seasons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     anime_id INT NOT NULL,
     season_number INT NOT NULL,
+    part_number INT DEFAULT 1,
     title VARCHAR(255),
     description TEXT,
     cover_image VARCHAR(255),
@@ -26,7 +27,7 @@ CREATE TABLE IF NOT EXISTS seasons (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_season (anime_id, season_number)
+    UNIQUE KEY unique_season_part (anime_id, season_number, part_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Create episodes table
@@ -81,6 +82,28 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create comments table
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    anime_id INT,
+    episode_id INT,
+    parent_id INT DEFAULT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE,
+    FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert sample comments
+INSERT INTO comments (user_id, anime_id, episode_id, content) VALUES
+(1, 1, 1, 'This episode was amazing! I can''t wait for the next one.'),
+(1, 1, 2, 'The animation quality in this episode is outstanding!'),
+(1, 2, 6, 'Demon Slayer has some of the best animation I''ve ever seen.');
 
 -- Create subscription_plans table
 CREATE TABLE IF NOT EXISTS subscription_plans (
@@ -146,10 +169,12 @@ INSERT INTO anime (title, description, cover_image, release_year, genres, status
 ('Demon Slayer', 'A boy raised in a family of demon slayers fights to cure his sister, who has been turned into a demon herself.', 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg', '2019', 'Action, Fantasy, Historical', 'ongoing');
 
 -- Sample seasons
-INSERT INTO seasons (anime_id, season_number, title, release_year) VALUES
-(1, 1, 'Attack on Titan Season 1', '2013'),
-(1, 2, 'Attack on Titan Season 2', '2017'),
-(2, 1, 'Demon Slayer: Kimetsu no Yaiba', '2019');
+INSERT INTO seasons (anime_id, season_number, part_number, title, release_year) VALUES
+(1, 1, 1, 'Attack on Titan Season 1', '2013'),
+(1, 1, 2, 'Attack on Titan Season 1 Part 2', '2014'),
+(1, 2, 1, 'Attack on Titan Season 2', '2017'),
+(2, 1, 1, 'Demon Slayer: Kimetsu no Yaiba', '2019'),
+(2, 1, 2, 'Demon Slayer: Mugen Train Arc', '2021');
 
 -- Sample episodes
 INSERT INTO episodes (season_id, episode_number, title, video_url, is_premium) VALUES

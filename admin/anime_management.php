@@ -839,7 +839,11 @@ try {
         <!-- Season header -->
         <div @click="open = !open" class="flex justify-between items-center p-4 cursor-pointer bg-gray-700 hover:bg-gray-600 transition-colors">
             <div class="flex items-center">
-                <span class="text-lg font-medium">Season <?= htmlspecialchars($season['season_number']) ?>: <?= htmlspecialchars($season['title'] ?? 'Untitled') ?></span>
+                <span class="text-lg font-medium">
+                    Season <?= htmlspecialchars($season['season_number']) ?>
+                    <?= $season['part_number'] > 1 ? ' Part ' . htmlspecialchars($season['part_number']) : '' ?>: 
+                    <?= htmlspecialchars($season['title'] ?? 'Untitled') ?>
+                </span>
                 <span class="ml-4 text-sm text-gray-400"><?= $season['episode_count'] ?> episode<?= $season['episode_count'] !== 1 ? 's' : '' ?></span>
             </div>
             <div class="flex items-center">
@@ -971,6 +975,13 @@ try {
                 </div>
                 
                 <div class="mb-4">
+                    <label for="part_number" class="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
+                    <input type="number" min="1" id="part_number" name="part_number" value="1"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                    <p class="text-xs text-gray-400 mt-1">Use for multiple parts within a season (default: 1)</p>
+                </div>
+                
+                <div class="mb-4">
                     <label for="season_title" class="block text-sm font-medium text-gray-300 mb-2">Season Title</label>
                     <input type="text" id="season_title" name="season_title" 
                         class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
@@ -1024,6 +1035,13 @@ try {
                     <label for="edit_season_number" class="block text-sm font-medium text-gray-300 mb-2">Season Number *</label>
                     <input type="number" min="1" id="edit_season_number" name="season_number" required
                         class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="edit_part_number" class="block text-sm font-medium text-gray-300 mb-2">Part Number</label>
+                    <input type="number" min="1" id="edit_part_number" name="part_number" value="1"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-4 text-white focus:outline-none focus:border-purple-500">
+                    <p class="text-xs text-gray-400 mt-1">Use for multiple parts within a season (default: 1)</p>
                 </div>
                 
                 <div class="mb-4">
