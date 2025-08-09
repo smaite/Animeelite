@@ -139,11 +139,17 @@ try {
     $sql = "SELECT * FROM anime $where_clause ORDER BY $sort_column $sort_direction LIMIT ? OFFSET ?";
     $stmt = $pdo->prepare($sql);
     
-    // Add pagination parameters
-    $params[] = $items_per_page;
-    $params[] = $offset;
+    // Add pagination parameters to the params array
+    $params[] = (int)$items_per_page;
+    $params[] = (int)$offset;
     
-    $stmt->execute($params);
+    // Bind all parameters
+    for ($i = 0; $i < count($params); $i++) {
+        $param_type = is_int($params[$i]) ? PDO::PARAM_INT : PDO::PARAM_STR;
+        $stmt->bindValue($i + 1, $params[$i], $param_type);
+    }
+    
+    $stmt->execute();
     $anime_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
