@@ -452,7 +452,7 @@ if (isset($_GET['success'])) {
                             <div class="flex items-center">
                                 <div class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-gray-700 mr-4">
                                     <?php if ($user['avatar']): ?>
-                                    <img src="<?= htmlspecialchars($user['avatar']) ?>" alt="<?= htmlspecialchars($user['username']) ?>" class="h-full w-full object-cover">
+                                    <img src="../<?= htmlspecialchars($user['avatar']) ?>" alt="<?= htmlspecialchars($user['username']) ?>" class="h-full w-full object-cover">
                                     <?php else: ?>
                                     <div class="h-full w-full flex items-center justify-center bg-purple-900">
                                         <span class="text-white font-medium">
