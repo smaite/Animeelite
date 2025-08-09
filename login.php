@@ -11,33 +11,32 @@ if (isset($_SESSION['user_id'])) {
 
 // Initialize variables
 $error = '';
-$username = '';
+$login_username = '';
 
 // Handle login form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+    $login_username = trim($_POST['username']);
+    $login_password = $_POST['password'];
     
     // Basic validation
-    if (empty($username) || empty($password)) {
+    if (empty($login_username) || empty($login_password)) {
         $error = "Please enter both username and password.";
     } else {
-        // Connect to database using config variables
+        // Connect to database using the config credentials
         try {
-            $db_username = $username; // Store the form username
             $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Get user from database
             $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
-            $stmt->execute([$db_username]); // Use the stored username
+            $stmt->execute([$login_username]);
             
             if ($stmt->rowCount() > 0) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 // Verify password
-                if (password_verify($password, $user['password'])) {
+                if (password_verify($login_password, $user['password'])) {
                     // Password is correct, create session
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
@@ -67,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error = "Invalid username or password.";
             }
         } catch (PDOException $e) {
-            $error = "Server error: " . $e->getMessage();
+            $error = "Database error: " . $e->getMessage();
         }
     }
 }
@@ -92,7 +91,7 @@ include 'includes/header.php';
         <form action="login.php" method="post">
             <div class="mb-4">
                 <label for="username" class="block text-gray-300 mb-2">Username</label>
-                <input type="text" id="username" name="username" value="<?= htmlspecialchars($username) ?>" required
+                <input type="text" id="username" name="username" value="<?= htmlspecialchars($login_username) ?>" required
                     class="w-full px-4 py-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-purple-500">
             </div>
             
