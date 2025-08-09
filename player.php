@@ -49,10 +49,21 @@ if (!$animeId) {
         } else {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Get seasons for this anime (using admin logic)
+            // Get seasons for this anime (using admin logic + aggressive deduplication)
             $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
             $stmt->execute([$animeId]);
-            $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $allSeasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Aggressive deduplication - keep only first occurrence of each season_number
+            $seasons = [];
+            $seenSeasonNumbers = [];
+            
+            foreach ($allSeasons as $season) {
+                if (!in_array($season['season_number'], $seenSeasonNumbers)) {
+                    $seasons[] = $season;
+                    $seenSeasonNumbers[] = $season['season_number'];
+                }
+            }
             
             // Get episodes for each season
             foreach ($seasons as &$season) {
