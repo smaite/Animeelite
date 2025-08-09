@@ -39,18 +39,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Connect to database
         try {
-            $pdo = new PDO("mysql:host=$host;dbname=$dbname", $GLOBALS['username'], $GLOBALS['password']);
+            // Use the database credentials from config.php
+            $db_username = $username; // From config.php
+            $db_password = $password; // From config.php
+            
+            // Rename form variables to avoid conflict with database credentials
+            $form_username = $username;
+            $form_email = $email;
+            $form_display_name = $display_name;
+            
+            $pdo = new PDO("mysql:host=$host;dbname=$dbname", $db_username, $db_password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Check if username already exists
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-            $stmt->execute([$username]);
+            $stmt->execute([$form_username]);
             if ($stmt->rowCount() > 0) {
                 $error = "Username already exists.";
             } else {
                 // Check if email already exists
                 $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-                $stmt->execute([$email]);
+                $stmt->execute([$form_email]);
                 if ($stmt->rowCount() > 0) {
                     $error = "Email already in use.";
                 } else {
@@ -59,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     
                     // Insert new user
                     $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$username, $email, $hashed_password, $display_name]);
+                    $stmt->execute([$form_username, $form_email, $hashed_password, $form_display_name]);
                     
                     $success = "Registration successful! You can now log in.";
                     
@@ -70,7 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
         } catch (PDOException $e) {
-            $error = "Server error. Please try again later.";
+            $error = "Server error: " . $e->getMessage();
+            error_log("Signup error: " . $e->getMessage());
         }
     }
 }
