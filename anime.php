@@ -59,7 +59,7 @@ if (!$anime_id) {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Get seasons for this anime
-            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? GROUP BY season_number ORDER BY season_number");
+            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
             $stmt->execute([$anime_id]);
             $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
