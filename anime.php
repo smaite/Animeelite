@@ -59,7 +59,7 @@ if (!$anime_id) {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Get seasons for this anime
-            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
+            $stmt = $pdo->prepare("SELECT DISTINCT season_number, id, title, part_number, description, release_year FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
             $stmt->execute([$anime_id]);
             $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
