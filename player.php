@@ -297,7 +297,6 @@ include 'includes/header.php';
                     <?php foreach ($seasons as $season): ?>
                     <option value="<?= $season['id'] ?>" <?= ($currentEpisode && $currentEpisode['season_id'] == $season['id']) ? 'selected' : '' ?>>
                         Season <?= $season['season_number'] ?>
-                        <?= $season['part_number'] > 1 ? ' Part ' . $season['part_number'] : '' ?>
                         <?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?>
                     </option>
                     <?php endforeach; ?>
@@ -309,7 +308,6 @@ include 'includes/header.php';
                 <h3 id="season-title" class="text-lg font-medium text-white mb-4">
                     <?php if ($currentEpisode): ?>
                         Season <?= $currentEpisode['season_number'] ?>
-                        <?= isset($currentEpisode['part_number']) && $currentEpisode['part_number'] > 1 ? ' Part ' . $currentEpisode['part_number'] : '' ?>
                     <?php else: ?>
                         Episodes
                     <?php endif; ?>

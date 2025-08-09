@@ -166,7 +166,7 @@ include 'includes/header.php';
                 <?php foreach ($seasons as $season): ?>
                 <div class="bg-gray-800 rounded-lg overflow-hidden mb-6">
                     <div class="p-4 bg-gray-700">
-                        <h3 class="text-lg font-medium">Season <?= $season['season_number'] ?><?= $season['part_number'] > 1 ? ' Part ' . $season['part_number'] : '' ?><?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?></h3>
+                        <h3 class="text-lg font-medium">Season <?= $season['season_number'] ?><?= $season['title'] ? ': ' . htmlspecialchars($season['title']) : '' ?></h3>
                     </div>
                     
                     <?php if (empty($season['episodes'])): ?>
