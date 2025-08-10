@@ -127,7 +127,7 @@ include 'includes/header.php';
         <div class="bg-gray-800 rounded-lg overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
             <a href="player.php?anime=<?= $item['anime_id'] ?>&episode=<?= $item['episode_id'] ?>">
                 <div class="relative">
-                    <div class="aspect-w-16 aspect-h-9 h-48">
+                    <div class="aspect-h-9 h-48">
                         <?php if ($item['cover_image']): ?>
                             <img src="<?= htmlspecialchars($item['cover_image']) ?>" alt="<?= htmlspecialchars($item['anime_title']) ?>" class="object-cover w-full h-full">
                         <?php else: ?>
