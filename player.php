@@ -559,59 +559,13 @@ include 'includes/header.php';
     
     // Start manual progress tracking (fallback when iframe access is limited)
     function startManualProgressTracking() {
-        // Create manual progress controls
-        const playerContainer = document.getElementById('player-container');
-        const controlsDiv = document.createElement('div');
-        controlsDiv.className = 'absolute bottom-4 left-4 right-4 flex items-center gap-4 bg-black bg-opacity-50 rounded-lg p-3 z-10';
-        controlsDiv.innerHTML = `
-            <div class="flex items-center gap-2 text-white text-sm">
-                <span>Progress:</span>
-                <input type="range" id="manual-progress" class="flex-1" min="0" max="100" value="0">
-                <span id="time-display">0:00 / 0:00</span>
-                <button id="mark-complete" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs">
-                    Mark Complete
-                </button>
-            </div>
-        `;
-        playerContainer.appendChild(controlsDiv);
-        
-        // Set up manual controls
-        const progressSlider = document.getElementById('manual-progress');
-        const timeDisplay = document.getElementById('time-display');
-        const markCompleteBtn = document.getElementById('mark-complete');
-        
+        // Set up basic progress tracking without manual controls
         // Estimate duration based on episode duration field or default to 24 minutes
         const episodeDurationStr = '<?= $currentEpisode['duration'] ?? "24" ?>';
         watchProgressData.totalDuration = parseInt(episodeDurationStr) * 60 || 1440; // Convert to seconds
         
-        progressSlider.addEventListener('input', function() {
-            const percentage = this.value / 100;
-            watchProgressData.currentPosition = watchProgressData.totalDuration * percentage;
-            updateTimeDisplay();
-            updateProgressBar();
-        });
-        
-        progressSlider.addEventListener('change', function() {
-            saveCurrentProgress(); // Save when user stops dragging
-        });
-        
-        markCompleteBtn.addEventListener('click', function() {
-            watchProgressData.currentPosition = watchProgressData.totalDuration;
-            progressSlider.value = 100;
-            updateTimeDisplay();
-            updateProgressBar();
-            saveCurrentProgress(true); // Mark as completed
-            showProgressNotification('Episode marked as completed!');
-        });
-        
-        // Update time display
-        function updateTimeDisplay() {
-            const current = formatTime(watchProgressData.currentPosition);
-            const total = formatTime(watchProgressData.totalDuration);
-            timeDisplay.textContent = `${current} / ${total}`;
-        }
-        
-        updateTimeDisplay();
+        // Update progress bar based on estimated progress
+        updateProgressBar();
     }
     
     // Update progress bar
