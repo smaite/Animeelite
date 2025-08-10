@@ -155,6 +155,30 @@ include 'includes/header.php';
                 <p class="text-gray-400">No seasons available for this anime.</p>
             </div>
             <?php else: ?>
+                <?php 
+                // Get watch progress for all episodes if user is logged in
+                $allEpisodeProgress = [];
+                if ($userData) {
+                    $allEpisodeIds = [];
+                    foreach ($seasons as $season) {
+                        foreach ($season['episodes'] as $episode) {
+                            $allEpisodeIds[] = $episode['id'];
+                        }
+                    }
+                    
+                    if (!empty($allEpisodeIds)) {
+                        $placeholders = implode(',', array_fill(0, count($allEpisodeIds), '?'));
+                        $stmt = $pdo->prepare("SELECT episode_id, position_seconds, is_completed FROM watch_history WHERE user_id = ? AND episode_id IN ($placeholders)");
+                        $stmt->execute(array_merge([$userData['id']], $allEpisodeIds));
+                        $progressData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        
+                        foreach ($progressData as $progress) {
+                            $allEpisodeProgress[$progress['episode_id']] = $progress;
+                        }
+                    }
+                }
+                ?>
+                
                 <?php foreach ($seasons as $season): ?>
                 <div class="bg-gray-800 rounded-lg overflow-hidden mb-6">
                     <div class="p-4 bg-gray-700">
@@ -168,19 +192,47 @@ include 'includes/header.php';
                     <?php else: ?>
                     <div class="divide-y divide-gray-700">
                         <?php foreach ($season['episodes'] as $episode): ?>
-                        <a href="player.php?anime=<?= $anime_id ?>&season=<?= $season['id'] ?>&episode=<?= $episode['id'] ?>" class="flex items-center p-4 hover:bg-gray-700 transition-colors">
-                            <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-600 rounded-lg mr-4">
+                        <?php 
+                        $progress = isset($allEpisodeProgress[$episode['id']]) ? $allEpisodeProgress[$episode['id']] : null;
+                        $isCompleted = $progress && $progress['is_completed'];
+                        $watchedSeconds = $progress ? $progress['position_seconds'] : 0;
+                        $episodeDuration = $episode['duration'] ? intval($episode['duration']) * 60 : 1440; // Convert minutes to seconds or default 24 min
+                        $progressPercentage = $episodeDuration > 0 ? min(($watchedSeconds / $episodeDuration) * 100, 100) : 0;
+                        ?>
+                        <a href="player.php?anime=<?= $anime_id ?>&season=<?= $season['id'] ?>&episode=<?= $episode['id'] ?>" class="flex items-center p-4 hover:bg-gray-700 transition-colors relative">
+                            <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-600 rounded-lg mr-4 relative">
                                 <span class="font-medium"><?= $episode['episode_number'] ?></span>
+                                <?php if ($isCompleted): ?>
+                                <span class="absolute -top-1 -right-1 bg-green-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">✓</span>
+                                <?php endif; ?>
                             </div>
                             <div class="flex-grow">
                                 <h4 class="font-medium"><?= htmlspecialchars($episode['title']) ?></h4>
                                 <?php if ($episode['description']): ?>
                                 <p class="text-sm text-gray-400 truncate mt-1"><?= htmlspecialchars($episode['description']) ?></p>
                                 <?php endif; ?>
+                                
+                                <!-- Progress bar for episode -->
+                                <?php if ($watchedSeconds > 0 && !$isCompleted): ?>
+                                <div class="mt-2 w-full bg-gray-600 rounded-full h-1 max-w-xs">
+                                    <div class="bg-purple-500 h-1 rounded-full transition-all duration-300" 
+                                         style="width: <?= $progressPercentage ?>%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <?= gmdate("i:s", $watchedSeconds) ?> watched
+                                </p>
+                                <?php elseif ($isCompleted): ?>
+                                <p class="text-xs text-green-400 mt-1">✓ Completed</p>
+                                <?php endif; ?>
                             </div>
-                            <?php if ($episode['is_premium'] == 1): ?>
-                            <span class="ml-4 bg-yellow-600 text-white text-xs px-2 py-1 rounded">PREMIUM</span>
-                            <?php endif; ?>
+                            <div class="flex items-center gap-2">
+                                <?php if ($episode['is_premium'] == 1): ?>
+                                <span class="bg-yellow-600 text-white text-xs px-2 py-1 rounded">PREMIUM</span>
+                                <?php endif; ?>
+                                <?php if ($watchedSeconds > 0 && !$isCompleted): ?>
+                                <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded">RESUME</span>
+                                <?php endif; ?>
+                            </div>
                         </a>
                         <?php endforeach; ?>
                     </div>

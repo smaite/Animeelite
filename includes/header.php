@@ -154,6 +154,7 @@ if (!isset($pageTitle)) {
                         <!-- Dropdown menu -->
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
                             <a href="profile.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
+                            <a href="continue_watching.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Continue Watching</a>
                             <a href="favorites.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Favorites</a>
                             <a href="history.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Watch History</a>
                             <?php if ($userData['role'] === 'admin'): ?>
