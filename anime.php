@@ -58,17 +58,9 @@ if (!$anime_id) {
         } else {
             $anime = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Get seasons for this anime (using exact debug logic that works)
-            $stmt = $pdo->prepare("SELECT * FROM seasons WHERE anime_id = ? ORDER BY season_number ASC");
-            $stmt->execute([$anime_id]);
-            $seasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Get episodes for each season (same as debug)
-            foreach ($seasons as &$season) {
-                $stmt = $pdo->prepare("SELECT * FROM episodes WHERE season_id = ? ORDER BY episode_number");
-                $stmt->execute([$season['id']]);
-                $season['episodes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            }
+            // Use the EXACT working logic from debug_seasons.php
+            require_once 'includes/seasons_helper.php';
+            $seasons = getSeasonsWithEpisodes($anime_id, $pdo);
             
             // Check if user has this anime in favorites
             $isFavorite = false;
