@@ -1,5 +1,5 @@
 <?php
-// Continue Watching page - displays user's partially watched episodes
+// Continue Watching page - displays anime user is currently watching (not completed)
 session_start();
 require_once 'config.php';
 
@@ -16,7 +16,7 @@ include 'includes/header.php';
 <main class="container mx-auto px-4 py-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-white mb-2">Continue Watching</h1>
-        <p class="text-gray-400">Pick up where you left off</p>
+        <p class="text-gray-400">Anime you're currently watching</p>
     </div>
     
     <div id="continue-watching-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,8 +48,8 @@ function loadContinueWatching() {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12">
                         <div class="bg-gray-800 rounded-lg p-8">
-                            <h3 class="text-xl font-medium text-white mb-4">No progress to resume</h3>
-                            <p class="text-gray-400 mb-6">Start watching some episodes to see your progress here!</p>
+                            <h3 class="text-xl font-medium text-white mb-4">No anime in progress</h3>
+                            <p class="text-gray-400 mb-6">Start watching some anime to see your progress here!</p>
                             <a href="browse.php" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                                 Browse Anime
                             </a>
@@ -72,11 +72,11 @@ function loadContinueWatching() {
 function createContinueWatchingCard(item) {
     return `
         <div class="bg-gray-800 rounded-lg overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg">
-            <a href="${item.player_url}">
+            <a href="anime.php?id=${item.anime_id}">
                 <div class="relative">
                     <div class="aspect-w-16 aspect-h-9 h-48">
-                        ${item.thumbnail ? 
-                            `<img src="${item.thumbnail}" alt="${item.episode_title}" class="object-cover w-full h-full">` :
+                        ${item.anime_cover ? 
+                            `<img src="${item.anime_cover}" alt="${item.anime_title}" class="object-cover w-full h-full">` :
                             `<div class="w-full h-full bg-gray-700 flex items-center justify-center">
                                 <span class="text-gray-400">No Image</span>
                              </div>`
@@ -85,25 +85,27 @@ function createContinueWatchingCard(item) {
                     
                     <!-- Progress overlay -->
                     <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                        <div class="w-full bg-gray-600 rounded-full h-1.5 mb-2">
-                            <div class="bg-purple-500 h-1.5 rounded-full" style="width: ${item.progress_percentage}%"></div>
+                        <div class="w-full bg-gray-600 rounded-full h-2 mb-2">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width: ${item.completion_percentage}%"></div>
                         </div>
-                        <span class="text-xs text-white font-medium">${item.progress_percentage.toFixed(1)}% watched</span>
+                        <span class="text-xs text-white font-medium">${item.completion_percentage}% Complete</span>
                     </div>
                     
-                    <!-- Resume button -->
+                    <!-- Status badge -->
                     <div class="absolute top-4 right-4">
                         <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                            RESUME
+                            WATCHING
                         </span>
                     </div>
                 </div>
                 
                 <div class="p-4">
-                    <h3 class="text-lg font-medium text-white mb-1 truncate">${item.anime_title}</h3>
-                    <p class="text-sm text-gray-400 mb-2">Season ${item.season_number}, Episode ${item.episode_number}</p>
-                    <p class="text-sm text-gray-300 truncate">${item.episode_title}</p>
-                    <p class="text-xs text-gray-500 mt-2">Resume at ${item.formatted_time}</p>
+                    <h3 class="text-lg font-medium text-white mb-2 truncate">${item.anime_title}</h3>
+                    <div class="flex justify-between items-center text-sm text-gray-400 mb-2">
+                        <span>${item.watched_episodes}/${item.total_episodes} episodes</span>
+                        <span>${item.completion_percentage}%</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Last watched: ${item.last_watched_formatted}</p>
                 </div>
             </a>
         </div>

@@ -155,27 +155,6 @@ include 'includes/header.php';
         <div class="md:col-span-2">
             <!-- Video player -->
             <div id="player-container" class="relative bg-gray-900 rounded-lg overflow-hidden mb-6">
-                <!-- Resume Progress Dialog -->
-                <div id="resume-dialog" class="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-20 hidden">
-                    <div class="bg-gray-800 rounded-lg p-6 max-w-md mx-4">
-                        <h3 class="text-xl font-bold text-white mb-4">Resume Watching?</h3>
-                        <p class="text-gray-300 mb-4">You were at <span id="resume-time"></span>. Would you like to continue from where you left off?</p>
-                        <div class="flex gap-3">
-                            <button id="resume-yes" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
-                                Resume
-                            </button>
-                            <button id="resume-no" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
-                                Start Over
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Progress Bar -->
-                <div id="progress-bar" class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700 z-10">
-                    <div id="progress-fill" class="h-full bg-purple-600 transition-all duration-200" style="width: 0%"></div>
-                </div>
-                
                 <div class="aspect-w-16">
                     <?php if ($isPremiumEpisode && !$userHasPremium): ?>
                     <!-- Premium episode overlay -->
@@ -358,12 +337,12 @@ include 'includes/header.php';
                     if ($userData && !empty($currentSeasonEpisodes)) {
                         $episodeIds = array_column($currentSeasonEpisodes, 'id');
                         $placeholders = implode(',', array_fill(0, count($episodeIds), '?'));
-                        $stmt = $pdo->prepare("SELECT episode_id, position_seconds, is_completed FROM watch_history WHERE user_id = ? AND episode_id IN ($placeholders)");
+                        $stmt = $pdo->prepare("SELECT episode_id FROM watch_history WHERE user_id = ? AND episode_id IN ($placeholders) AND is_completed = 1");
                         $stmt->execute(array_merge([$userData['id']], $episodeIds));
-                        $progressData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        $watchedEpisodes = $stmt->fetchAll(PDO::FETCH_COLUMN);
                         
-                        foreach ($progressData as $progress) {
-                            $episodeProgress[$progress['episode_id']] = $progress;
+                        foreach ($watchedEpisodes as $episodeId) {
+                            $episodeProgress[$episodeId] = true;
                         }
                     }
                     ?>
@@ -373,11 +352,7 @@ include 'includes/header.php';
                     <?php else: ?>
                         <?php foreach ($currentSeasonEpisodes as $episode): ?>
                         <?php 
-                        $progress = isset($episodeProgress[$episode['id']]) ? $episodeProgress[$episode['id']] : null;
-                        $isCompleted = $progress && $progress['is_completed'];
-                        $watchedSeconds = $progress ? $progress['position_seconds'] : 0;
-                        $episodeDuration = $episode['duration'] ? intval($episode['duration']) * 60 : 1440; // Convert minutes to seconds or default 24 min
-                        $progressPercentage = $episodeDuration > 0 ? min(($watchedSeconds / $episodeDuration) * 100, 100) : 0;
+                        $isCompleted = isset($episodeProgress[$episode['id']]);
                         ?>
                         <a href="?anime=<?= $animeId ?>&episode=<?= $episode['id'] ?>" 
                            class="bg-gray-700 hover:bg-gray-600 rounded-lg overflow-hidden transition-all duration-200 flex items-center relative
@@ -398,17 +373,10 @@ include 'includes/header.php';
                                 <p class="text-xs text-gray-400">Episode <?= $episode['episode_number'] ?><?= $episode['duration'] ? ' • ' . $episode['duration'] . ' min' : '' ?></p>
                                 
                                 <!-- Progress bar for episode -->
-                                <?php if ($watchedSeconds > 0): ?>
-                                <div class="mt-1 w-full bg-gray-600 rounded-full h-1">
-                                    <div class="<?= $isCompleted ? 'bg-green-500' : 'bg-purple-500' ?> h-1 rounded-full transition-all duration-300" 
-                                         style="width: <?= $progressPercentage ?>%"></div>
-                                </div>
+                                <?php if ($isCompleted): ?>
+                                <div class="mt-1 w-full bg-green-500 rounded-full h-1"></div>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    <?php if ($isCompleted): ?>
-                                        Completed
-                                    <?php else: ?>
-                                        <?= gmdate("i:s", $watchedSeconds) ?> watched
-                                    <?php endif; ?>
+                                    Completed
                                 </p>
                                 <?php endif; ?>
                             </div>
@@ -423,15 +391,10 @@ include 'includes/header.php';
 </main>
 
 <script>
-    // Watch Progress System
-    let watchProgressData = {
-        episodeId: <?= $currentEpisode ? $currentEpisode['id'] : 0 ?>,
-        currentPosition: 0,
-        totalDuration: 0,
-        progressInterval: null,
-        saveInterval: null,
-        isLoggedIn: <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>
-    };
+    // Simple watch tracking - just mark as watched when user starts playing
+    let episodeId = <?= $currentEpisode ? $currentEpisode['id'] : 0 ?>;
+    let isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
+    let hasMarkedWatched = false;
 
     // Handle season selector
     document.addEventListener('DOMContentLoaded', function() {
@@ -445,9 +408,9 @@ include 'includes/header.php';
             });
         }
         
-        // Initialize watch progress system
-        if (watchProgressData.isLoggedIn && watchProgressData.episodeId > 0) {
-            initializeWatchProgress();
+        // Mark episode as watched after 30 seconds
+        if (isLoggedIn && episodeId > 0) {
+            setTimeout(markEpisodeAsWatched, 30000); // 30 seconds
         }
         
         // Initialize comments
@@ -463,168 +426,40 @@ include 'includes/header.php';
         }
     });
     
-    // Initialize watch progress system
-    function initializeWatchProgress() {
-        loadSavedProgress();
-        
-        // Set up periodic progress saving (every 10 seconds)
-        watchProgressData.saveInterval = setInterval(saveCurrentProgress, 10000);
-        
-        // Save progress when user leaves the page
-        window.addEventListener('beforeunload', function(e) {
-            saveCurrentProgress();
-        });
-        
-        // Save progress when page becomes hidden
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                saveCurrentProgress();
-            }
-        });
-        
-        // Try to get video duration and position (works if iframe allows access)
-        try {
-            const iframe = document.getElementById('video-player');
-            if (iframe) {
-                // Listen for messages from iframe if supported
-                window.addEventListener('message', function(event) {
-                    if (event.data && event.data.type === 'video-progress') {
-                        watchProgressData.currentPosition = event.data.currentTime;
-                        watchProgressData.totalDuration = event.data.duration;
-                        updateProgressBar();
-                    }
-                });
-                
-                // Start manual progress tracking fallback
-                startManualProgressTracking();
-            }
-        } catch (e) {
-            console.log('Video iframe access limited, using manual tracking');
-            startManualProgressTracking();
-        }
-    }
-    
-    // Load saved progress from server
-    function loadSavedProgress() {
-        fetch(`api/watch_progress.php?episode_id=${watchProgressData.episodeId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.data.position_seconds > 30) { // Only show resume if > 30 seconds
-                    showResumeDialog(data.data.position_seconds);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading saved progress:', error);
-            });
-    }
-    
-    // Show resume dialog
-    function showResumeDialog(savedPosition) {
-        const dialog = document.getElementById('resume-dialog');
-        const timeSpan = document.getElementById('resume-time');
-        const resumeYes = document.getElementById('resume-yes');
-        const resumeNo = document.getElementById('resume-no');
-        
-        timeSpan.textContent = formatTime(savedPosition);
-        dialog.classList.remove('hidden');
-        
-        resumeYes.onclick = function() {
-            dialog.classList.add('hidden');
-            resumeFromPosition(savedPosition);
-        };
-        
-        resumeNo.onclick = function() {
-            dialog.classList.add('hidden');
-            watchProgressData.currentPosition = 0;
-            saveCurrentProgress(); // Reset saved position
-        };
-    }
-    
-    // Resume from specific position
-    function resumeFromPosition(position) {
-        watchProgressData.currentPosition = position;
-        updateProgressBar();
-        
-        // Try to seek iframe if possible (most video players support URL parameters)
-        const iframe = document.getElementById('video-player');
-        if (iframe && iframe.src) {
-            const url = new URL(iframe.src);
-            url.searchParams.set('t', position + 's');
-            iframe.src = url.toString();
-        }
-        
-        // Show user notification
-        showProgressNotification(`Resumed from ${formatTime(position)}`);
-    }
-    
-    // Start manual progress tracking (fallback when iframe access is limited)
-    function startManualProgressTracking() {
-        // Set up basic progress tracking without manual controls
-        // Estimate duration based on episode duration field or default to 24 minutes
-        const episodeDurationStr = '<?= $currentEpisode['duration'] ?? "24" ?>';
-        watchProgressData.totalDuration = parseInt(episodeDurationStr) * 60 || 1440; // Convert to seconds
-        
-        // Update progress bar based on estimated progress
-        updateProgressBar();
-    }
-    
-    // Update progress bar
-    function updateProgressBar() {
-        const progressFill = document.getElementById('progress-fill');
-        if (progressFill && watchProgressData.totalDuration > 0) {
-            const percentage = (watchProgressData.currentPosition / watchProgressData.totalDuration) * 100;
-            progressFill.style.width = Math.min(percentage, 100) + '%';
-        }
-    }
-    
-    // Save current progress to server
-    function saveCurrentProgress(forceComplete = false) {
-        if (!watchProgressData.isLoggedIn || watchProgressData.episodeId === 0) {
+    // Mark episode as watched
+    function markEpisodeAsWatched() {
+        if (hasMarkedWatched || !isLoggedIn || episodeId === 0) {
             return;
         }
         
-        const data = {
-            episode_id: watchProgressData.episodeId,
-            position_seconds: Math.floor(watchProgressData.currentPosition),
-            duration_seconds: Math.floor(watchProgressData.totalDuration),
-            is_completed: forceComplete
-        };
+        hasMarkedWatched = true;
         
         fetch('api/watch_progress.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                episode_id: episodeId
+            })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.is_completed) {
-                showProgressNotification('Episode completed! ✓');
+            if (data.success) {
+                console.log('Episode marked as watched');
+                // Show a subtle notification
+                showNotification('Episode added to watch history ✓');
             }
         })
         .catch(error => {
-            console.error('Error saving progress:', error);
+            console.error('Error marking episode as watched:', error);
         });
     }
     
-    // Format time in MM:SS or HH:MM:SS format
-    function formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        
-        if (hours > 0) {
-            return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        } else {
-            return `${minutes}:${secs.toString().padStart(2, '0')}`;
-        }
-    }
-    
-    // Show progress notification
-    function showProgressNotification(message) {
+    // Show notification
+    function showNotification(message) {
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+        notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
         notification.textContent = message;
         document.body.appendChild(notification);
         

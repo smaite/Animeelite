@@ -156,7 +156,7 @@ if (!isset($pageTitle)) {
                             <a href="profile.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
                             <a href="continue_watching.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Continue Watching</a>
                             <a href="favorites.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Favorites</a>
-                            <a href="history.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Watch History</a>
+                            <a href="history.php" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">My Progress</a>
                             <?php if ($userData['role'] === 'admin'): ?>
                                 <a href="admin/" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Admin Panel</a>
                             <?php endif; ?>
@@ -194,7 +194,7 @@ if (!isset($pageTitle)) {
                 <div class="border-t border-gray-700 my-2 pt-2">
                     <a href="profile.php" class="block py-2 text-gray-300 hover:text-white">Profile</a>
                     <a href="favorites.php" class="block py-2 text-gray-300 hover:text-white">Favorites</a>
-                    <a href="history.php" class="block py-2 text-gray-300 hover:text-white">Watch History</a>
+                    <a href="history.php" class="block py-2 text-gray-300 hover:text-white">My Progress</a>
                     <?php if ($userData['role'] === 'admin'): ?>
                         <a href="admin/" class="block py-2 text-gray-300 hover:text-white">Admin Panel</a>
                     <?php endif; ?>

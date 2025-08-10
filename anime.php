@@ -156,8 +156,8 @@ include 'includes/header.php';
             </div>
             <?php else: ?>
                 <?php 
-                // Get watch progress for all episodes if user is logged in
-                $allEpisodeProgress = [];
+                // Get watch status for all episodes if user is logged in
+                $allEpisodeWatched = [];
                 if ($userData) {
                     $allEpisodeIds = [];
                     foreach ($seasons as $season) {
@@ -168,12 +168,12 @@ include 'includes/header.php';
                     
                     if (!empty($allEpisodeIds)) {
                         $placeholders = implode(',', array_fill(0, count($allEpisodeIds), '?'));
-                        $stmt = $pdo->prepare("SELECT episode_id, position_seconds, is_completed FROM watch_history WHERE user_id = ? AND episode_id IN ($placeholders)");
+                        $stmt = $pdo->prepare("SELECT episode_id FROM watch_history WHERE user_id = ? AND episode_id IN ($placeholders) AND is_completed = 1");
                         $stmt->execute(array_merge([$userData['id']], $allEpisodeIds));
-                        $progressData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        $watchedEpisodes = $stmt->fetchAll(PDO::FETCH_COLUMN);
                         
-                        foreach ($progressData as $progress) {
-                            $allEpisodeProgress[$progress['episode_id']] = $progress;
+                        foreach ($watchedEpisodes as $episodeId) {
+                            $allEpisodeWatched[$episodeId] = true;
                         }
                     }
                 }
@@ -193,16 +193,12 @@ include 'includes/header.php';
                     <div class="divide-y divide-gray-700">
                         <?php foreach ($season['episodes'] as $episode): ?>
                         <?php 
-                        $progress = isset($allEpisodeProgress[$episode['id']]) ? $allEpisodeProgress[$episode['id']] : null;
-                        $isCompleted = $progress && $progress['is_completed'];
-                        $watchedSeconds = $progress ? $progress['position_seconds'] : 0;
-                        $episodeDuration = $episode['duration'] ? intval($episode['duration']) * 60 : 1440; // Convert minutes to seconds or default 24 min
-                        $progressPercentage = $episodeDuration > 0 ? min(($watchedSeconds / $episodeDuration) * 100, 100) : 0;
+                        $isWatched = isset($allEpisodeWatched[$episode['id']]);
                         ?>
                         <a href="player.php?anime=<?= $anime_id ?>&season=<?= $season['id'] ?>&episode=<?= $episode['id'] ?>" class="flex items-center p-4 hover:bg-gray-700 transition-colors relative">
                             <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-gray-600 rounded-lg mr-4 relative">
                                 <span class="font-medium"><?= $episode['episode_number'] ?></span>
-                                <?php if ($isCompleted): ?>
+                                <?php if ($isWatched): ?>
                                 <span class="absolute -top-1 -right-1 bg-green-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">✓</span>
                                 <?php endif; ?>
                             </div>
@@ -213,24 +209,13 @@ include 'includes/header.php';
                                 <?php endif; ?>
                                 
                                 <!-- Progress bar for episode -->
-                                <?php if ($watchedSeconds > 0 && !$isCompleted): ?>
-                                <div class="mt-2 w-full bg-gray-600 rounded-full h-1 max-w-xs">
-                                    <div class="bg-purple-500 h-1 rounded-full transition-all duration-300" 
-                                         style="width: <?= $progressPercentage ?>%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    <?= gmdate("i:s", $watchedSeconds) ?> watched
-                                </p>
-                                <?php elseif ($isCompleted): ?>
+                                <?php if ($isWatched): ?>
                                 <p class="text-xs text-green-400 mt-1">✓ Completed</p>
                                 <?php endif; ?>
                             </div>
                             <div class="flex items-center gap-2">
                                 <?php if ($episode['is_premium'] == 1): ?>
                                 <span class="bg-yellow-600 text-white text-xs px-2 py-1 rounded">PREMIUM</span>
-                                <?php endif; ?>
-                                <?php if ($watchedSeconds > 0 && !$isCompleted): ?>
-                                <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded">RESUME</span>
                                 <?php endif; ?>
                             </div>
                         </a>
